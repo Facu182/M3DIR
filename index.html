@@ -330,7 +330,7 @@ const ICONS = {
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>',
   convert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>',
-  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.6-1.3 1.2-1.9 1.3-.5.1-1.1.1-1.7-.1-.4-.1-1-.3-1.6-.6-2.8-1.2-4.6-4-4.8-4.2-.1-.2-1.2-1.6-1.2-3 0-1.4.7-2.1 1-2.4.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.7.7 1.9.1.2.1.4 0 .5-.1.2-.2.3-.3.5-.2.2-.3.3-.5.5-.2.2-.4.4-.2.7.2.4 1 1.5 2.1 2.4 1.4 1.2 2.5 1.6 2.9 1.8.3.1.5.1.7-.1.2-.3.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.8.8.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.6-1.3 1.2-1.9 1.3-.5.1-1.1.1-1.7-.1-.4-.1-1-.3-1.6-.6-2.8-1.2-4.6-4-4.8-4.2-.1-.2-1.2-1.6-1.2-3 0-1.4.7-2.1 1-2.4.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.7.7 1.9.1.2.1.4 0 .5-.1.2-.2.3-.3.5-.2.2-.4.4-.2.7.2.4 1 1.5 2.1 2.4 1.4 1.2 2.5 1.6 2.9 1.8.3.1.5.1.7-.1.2-.3.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.8.8.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
   alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
   upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0 4 4m-4-4-4 4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
@@ -343,16 +343,15 @@ let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gas
   precioKwh:140, consumoW:120, vidaUtilHoras:4320, costoRepuestos:150000, margenErrorPct:5, margenGanancia:4, markupInsumosPct:30, markupMLPct:20} };
 
 let storageOk = true;
-if(typeof window.storage === 'undefined'){
-  storageOk = false;
-  const _mem = {};
-  window.storage = {
-    async get(k){ return _mem[k]!==undefined ? {key:k, value:_mem[k]} : null; },
-    async set(k,v){ _mem[k]=v; return {key:k,value:v}; },
-    async delete(k){ delete _mem[k]; return {key:k,deleted:true}; },
-    async list(){ return {keys:Object.keys(_mem)}; }
-  };
-}
+try { localStorage.getItem('test'); } catch(e) { storageOk = false; }
+
+window.storage = {
+  async get(k){ if(!storageOk) return null; const v = localStorage.getItem(k); return v ? {key:k, value:v} : null; },
+  async set(k,v){ if(storageOk) localStorage.setItem(k, v); return {key:k,value:v}; },
+  async delete(k){ if(storageOk) localStorage.removeItem(k); return {key:k,deleted:true}; },
+  async list(){ return {keys: storageOk ? Object.keys(localStorage) : []}; }
+};
+
 async function loadAll(){
   for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos']){
     try{ const r = await window.storage.get(KEYS[k]); DB[k] = r ? JSON.parse(r.value) : []; }catch(e){ DB[k] = []; }
@@ -360,7 +359,7 @@ async function loadAll(){
   try{ const r = await window.storage.get(KEYS.config); if(r) DB.config = JSON.parse(r.value); }catch(e){}
 }
 async function save(key){
-  try{ const ok = await window.storage.set(KEYS[key], JSON.stringify(DB[key])); if(!ok) toast('No se pudo guardar.'); }catch(e){ toast('No se pudo guardar. Reintentá.'); }
+  try{ const ok = await window.storage.set(KEYS[key], JSON.stringify(DB[key])); if(!ok && storageOk===false) toast('No se pudo guardar. Modo local.'); }catch(e){ toast('No se pudo guardar. Reintentá.'); }
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg, actionLabel, actionFn){
@@ -418,22 +417,23 @@ function goTo(id, opts){ current = id; renderNav(); renderPage(opts); }
 /* ============ MODAL ENGINE ============ */
 const SCHEMAS = {
   pedido: { title:(e)=> e? 'Editar pedido' : 'Nuevo pedido', fields: [
-      {key:'cliente', label:'Cliente', type:'text', required:true, placeholder:'Nombre del cliente'},
-      {key:'contacto', label:'Contacto (tel / @usuario)', type:'text', placeholder:'WhatsApp o Instagram'},
-      {key:'origen', label:'Origen', type:'select', options:['Instagram','Facebook Marketplace','WhatsApp','Otro'], default:'Instagram', row:'a'},
-      {key:'estado', label:'Estado', type:'select', options:['Pendiente','Imprimiendo','Listo','Enviado','Entregado','Cancelado'], default:'Pendiente', row:'a'},
-      {key:'modelo', label:'Modelo / pieza', type:'text', placeholder:'Ej: Maceta hexagonal'},
-      {key:'color', label:'Color', type:'text', placeholder:'Ej: Negro mate', row:'b'},
-      {key:'cantidad', label:'Cantidad', type:'number', default:1, row:'b'},
-      {key:'precio', label:'Precio total', type:'number', default:0, row:'c'},
-      {key:'anticipo', label:'Seña / anticipo pagado', type:'number', default:0, row:'c'},
-      {key:'estadoPago', label:'Estado de pago', type:'select', options:['Sin seña','Seña pagada','Pagado completo'], default:'Sin seña', row:'d'},
-      {key:'fecha', label:'Fecha del pedido', type:'date', default:()=>todayStr(), row:'d'},
-      {key:'fechaEntrega', label:'Fecha de entrega prometida', type:'date'},
-      {key:'envio', label:'Envío', type:'select', options:['Sin envío (retira)','A coordinar','Con envío (costo aparte)'], default:'Sin envío (retira)', row:'e'},
+      {key:'cliente', label:'Cliente', type:'text', required:true, placeholder:'Nombre del cliente', row:'a'},
+      {key:'contacto', label:'Contacto (tel / @usuario)', type:'text', placeholder:'WhatsApp o Instagram', row:'a'},
+      {key:'origen', label:'Origen', type:'select', options:['Instagram','Facebook Marketplace','WhatsApp','Otro'], default:'Instagram', row:'b'},
+      {key:'estado', label:'Estado', type:'select', options:['Pendiente','Imprimiendo','Listo','Enviado','Entregado','Cancelado'], default:'Pendiente', row:'b'},
+      {key:'modelo', label:'Modelo / pieza', type:'text', placeholder:'Ej: Maceta hexagonal', row:'c'},
+      {key:'color', label:'Color', type:'text', placeholder:'Ej: Negro mate', row:'c'},
+      {key:'cantidad', label:'Cantidad', type:'number', default:1, row:'d'},
+      {key:'precio', label:'Precio (solo piezas)', type:'number', default:0, row:'d'},
+      {key:'envio', label:'Tipo de Envío', type:'select', options:['Sin envío (retira)','A coordinar','Con envío (costo aparte)'], default:'Sin envío (retira)', row:'e'},
       {key:'costoEnvio', label:'Costo de envío', type:'number', default:0, row:'e'},
-      {key:'direccion', label:'Dirección / punto de entrega', type:'text'},
-      {key:'notas', label:'Notas', type:'textarea'},
+      {key:'costoEmbalaje', label:'Costo de embalaje (bolsas, cajas, etc.)', type:'number', default:0, row:'f'},
+      {key:'anticipo', label:'Seña / anticipo pagado', type:'number', default:0, row:'f'},
+      {key:'estadoPago', label:'Estado de pago', type:'select', options:['Sin seña','Seña pagada','Pagado completo'], default:'Sin seña', row:'g'},
+      {key:'fecha', label:'Fecha del pedido', type:'date', default:()=>todayStr(), row:'g'},
+      {key:'fechaEntrega', label:'Fecha de entrega prometida', type:'date', row:'h'},
+      {key:'direccion', label:'Dirección / punto de entrega', type:'text', row:'h'},
+      {key:'notas', label:'Notas', type:'textarea', row:'i'},
     ]
   },
   filamento: { title:(e)=> e? 'Editar filamento' : 'Nuevo carrete', fields: [
@@ -577,12 +577,16 @@ function renderDashboard(){
   const activos = DB.pedidos.filter(p=>!['Entregado','Cancelado'].includes(p.estado));
   const atrasados = DB.pedidos.filter(isAtrasado);
   const esteMes = todayStr().slice(0,7);
-  const ingresosMes = DB.pedidos.filter(p=>p.fecha && p.fecha.startsWith(esteMes) && p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0),0);
+  const ingresosMes = DB.pedidos.filter(p=>p.fecha && p.fecha.startsWith(esteMes) && p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
   const gastosMes = DB.gastos.filter(g=>g.fecha && g.fecha.startsWith(esteMes)).reduce((s,g)=>s+Number(g.monto||0),0);
   const bajoStock = DB.filamentos.filter(lowStock);
   const sinResponder = DB.leads.filter(l=>!l.respondido);
   const proximas = activos.filter(p=>p.fechaEntrega && p.fechaEntrega>=todayStr()).sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega)).slice(0,5);
-  const porCobrar = DB.pedidos.filter(p=>p.estado!=='Cancelado' && p.estadoPago!=='Pagado completo').reduce((s,p)=>s+(Number(p.precio||0)-Number(p.anticipo||0)),0);
+  
+  const porCobrar = DB.pedidos.filter(p=>p.estado!=='Cancelado' && p.estadoPago!=='Pagado completo').reduce((s,p)=>{
+    const calcTotal = Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0);
+    return s + (calcTotal - Number(p.anticipo||0));
+  },0);
 
   const bannerHtml = atrasados.length ? `<div class="banner">${ICONS.alert}Tenés ${atrasados.length} pedido(s) atrasado(s) — <a onclick="goTo('pedidos')" style="cursor:pointer">verlos</a></div>` : '';
 
@@ -627,7 +631,7 @@ function renderChart(){
   const now = new Date();
   for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(d.toISOString().slice(0,7)); }
   const data = months.map(m=>{
-    const ing = DB.pedidos.filter(p=>p.fecha&&p.fecha.startsWith(m)&&p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0),0);
+    const ing = DB.pedidos.filter(p=>p.fecha&&p.fecha.startsWith(m)&&p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
     const gas = DB.gastos.filter(g=>g.fecha&&g.fecha.startsWith(m)).reduce((s,g)=>s+Number(g.monto||0),0);
     return {m, ing, gas};
   });
@@ -648,22 +652,30 @@ function renderPedidos(){
   const estados = ['Todos','Pendiente','Imprimiendo','Listo','Enviado','Entregado','Cancelado'];
   let list = DB.pedidos.filter(p=> pedidoFilter==='Todos' || p.estado===pedidoFilter);
   if(pedidoSearch) list = list.filter(p=> (p.cliente||'').toLowerCase().includes(pedidoSearch.toLowerCase()));
+  
   if(pedidoSort==='reciente') list = [...list].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   else if(pedidoSort==='entrega') list = [...list].sort((a,b)=>(a.fechaEntrega||'9999').localeCompare(b.fechaEntrega||'9999'));
-  else if(pedidoSort==='precio') list = [...list].sort((a,b)=>Number(b.precio||0)-Number(a.precio||0));
+  else if(pedidoSort==='precio') list = [...list].sort((a,b)=>{
+      const tA = Number(a.precio||0)+Number(a.costoEnvio||0)+Number(a.costoEmbalaje||0);
+      const tB = Number(b.precio||0)+Number(b.costoEnvio||0)+Number(b.costoEmbalaje||0);
+      return tB - tA;
+  });
+
   const toolbar = `<div class="toolbar">
     <select onchange="pedidoFilter=this.value;renderPage()">${estados.map(e=>`<option ${e===pedidoFilter?'selected':''}>${e}</option>`).join('')}</select>
     <select onchange="pedidoSort=this.value;renderPage()">
       <option value="reciente" ${pedidoSort==='reciente'?'selected':''}>Más recientes</option>
       <option value="entrega" ${pedidoSort==='entrega'?'selected':''}>Entrega más próxima</option>
-      <option value="precio" ${pedidoSort==='precio'?'selected':''}>Mayor precio</option>
+      <option value="precio" ${pedidoSort==='precio'?'selected':''}>Mayor precio total</option>
     </select>
     <input class="search" type="text" placeholder="Buscar cliente..." value="${esc(pedidoSearch)}" oninput="renderPage({search:this.value})">
     <div class="grow"></div>
     <span style="color:var(--text-faint);font-size:12px;">${list.length} pedido(s)</span>
   </div>`;
+
   if(!list.length) return toolbar + emptyBlock('No hay pedidos acá','Probá cambiar el filtro o creá un pedido nuevo.');
   const rows = list.map(p=>{
+    const totalPed = Number(p.precio||0) + Number(p.costoEnvio||0) + Number(p.costoEmbalaje||0);
     const pagoClass = p.estadoPago==='Pagado completo'?'pay-completo':p.estadoPago==='Seña pagada'?'pay-seña':'pay-sinseña';
     const waMsg = p.estado==='Listo' ? `Hola ${p.cliente}! Tu pedido de ${p.modelo||'tu impresión'} ya está listo 🙌`
       : p.estado==='Enviado' ? `Hola ${p.cliente}! Tu pedido de ${p.modelo||'tu impresión'} ya salió en camino 🚚`
@@ -671,7 +683,11 @@ function renderPedidos(){
     return `<div class="card-row">
       <div class="main-cell"><div class="name">${esc(p.cliente)}</div><div class="sub">${esc(p.modelo||'—')} ${p.color?'· '+esc(p.color):''} · ${p.origen||''}</div></div>
       <div><span class="cell-label">Cant.</span><span class="cell-val">${p.cantidad||1}</span></div>
-      <div><span class="cell-label">Precio</span><span class="cell-val">${money(p.precio)}</span><div class="${pagoClass}" style="font-size:10.5px;font-weight:700;margin-top:2px;">${p.estadoPago||'Sin seña'}</div></div>
+      <div>
+        <span class="cell-label">Total</span><span class="cell-val">${money(totalPed)}</span>
+        <div class="${pagoClass}" style="font-size:10.5px;font-weight:700;margin-top:2px;">${p.estadoPago||'Sin seña'}</div>
+        <div style="font-size:9.5px;color:var(--text-faint);margin-top:2px;">(Emb: ${money(p.costoEmbalaje||0)})</div>
+      </div>
       <div><span class="cell-label">Envío</span><span class="cell-val" style="font-size:11.5px;font-family:inherit;">${envioShort(p)}</span></div>
       <div>${badge(p.estado)} ${isAtrasado(p)?'<span class="badge b-atrasado">Atrasado</span>':''}<div style="font-size:11px;color:var(--text-faint);margin-top:5px;">${p.fechaEntrega?'Entrega '+fmtDate(p.fechaEntrega):fmtDate(p.fecha)}</div></div>
       <div class="row-actions">
@@ -704,8 +720,12 @@ function renderClientes(){
     const key = (p.cliente||'Sin nombre').trim().toLowerCase();
     if(!map[key]) map[key] = {cliente:p.cliente||'Sin nombre', contacto:p.contacto, pedidos:0, total:0, pagado:0, ultimo:'', origen:{}};
     const c = map[key];
-    c.pedidos++; if(p.estado!=='Cancelado') c.total += Number(p.precio||0);
-    c.pagado += Number(p.anticipo||0) + (p.estadoPago==='Pagado completo'? (Number(p.precio||0)-Number(p.anticipo||0)) : 0);
+    
+    const currTotal = Number(p.precio||0) + Number(p.costoEnvio||0) + Number(p.costoEmbalaje||0);
+    c.pedidos++; 
+    if(p.estado!=='Cancelado') c.total += currTotal;
+    c.pagado += Number(p.anticipo||0) + (p.estadoPago==='Pagado completo'? (currTotal - Number(p.anticipo||0)) : 0);
+    
     if(!c.ultimo || (p.fecha||'') > c.ultimo) c.ultimo = p.fecha||c.ultimo;
     if(p.contacto) c.contacto = p.contacto;
     c.origen[p.origen||'Otro'] = (c.origen[p.origen||'Otro']||0)+1;
