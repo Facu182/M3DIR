@@ -304,11 +304,11 @@ body[data-theme="dark"] .switch::after{left:17px;background:#fff;}
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="if(event.target===this) closeModal()">
+<div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-head"><h3 id="modalTitle">Nuevo</h3><button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-head"><h3 id="modalTitle">Nuevo</h3><button class="btn btn-ghost btn-sm" onclick="closeModalConfirm()">✕</button></div>
     <div class="modal-body" id="modalBody"></div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="modalSaveBtn">Guardar</button></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModalConfirm()">Salir sin guardar</button><button class="btn btn-primary" id="modalSaveBtn">Guardar</button></div>
   </div>
 </div>
 
@@ -518,6 +518,9 @@ async function saveForm(type, item){
   toast('Guardado');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+function closeModalConfirm(){
+  if(confirm('¿Salir sin guardar los cambios?')) closeModal();
+}
 async function removeItem(key, id, label){
   const idx = DB[key].findIndex(x=>x.id===id);
   if(idx===-1) return;
@@ -1038,7 +1041,7 @@ async function toggleTheme(){
 }
 
 /* ============ KEYBOARD / MISC ============ */
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModalConfirm(); });
 
 /* ============ INIT ============ */
 (async function init(){
