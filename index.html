@@ -4,34 +4,54 @@
 <meta charset="UTF-8">
 <title>M3DIIR · Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FAFAFA; --surface:#FFFFFF; --surface-2:#F5F5F5; --surface-3:#EFEFEF;
-  --border:#DBDBDB; --border-soft:#EFEFEF;
-  --text:#262626; --text-dim:#8E8E8E; --text-faint:#C7C7C7;
-  --blue:#0095F6; --blue-dim:#E8F4FD;
-  --danger:#ED4956; --danger-dim:#FDEAEA;
-  --good:#2F9E44; --good-dim:#EAF8E6;
-  --warn:#B7791F; --warn-dim:#FFF7E0;
-  --purple:#833AB4; --purple-dim:#ECEAFE;
-  --grad:linear-gradient(135deg,#405DE6 0%,#5851DB 15%,#833AB4 35%,#C13584 55%,#E1306C 70%,#FD1D1D 82%,#F77737 92%,#FCAF45 100%);
-  --radius:12px; --radius-sm:8px;
-  --font:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --bg:#F2F3EE; --surface:#FFFFFF; --surface-2:#EAEBE3; --surface-3:#DFE1D6;
+  --border:#D6D8CB; --border-soft:#E7E8DF;
+  --text:#1E2320; --text-dim:#72786C; --text-faint:#A7AC9C;
+  --blue:#2C5F76; --blue-dim:#E1EBEE;
+  --danger:#BC4438; --danger-dim:#F6E3DF;
+  --good:#3E7C50; --good-dim:#E5F0E7;
+  --warn:#A47728; --warn-dim:#F3ECD9;
+  --copper:#AD5A2C; --copper-dim:#F3E3D6;
+  --purple:#5C5A9C; --purple-dim:#E9E8F3;
+  --grad:linear-gradient(135deg,#2C5F76 0%,#5C6E63 45%,#AD5A2C 100%);
+  --radius:10px; --radius-sm:7px;
+  --font:'Inter',sans-serif; --font-display:'Space Grotesk','Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 2px rgba(30,35,32,.05), 0 1px 0 rgba(30,35,32,.03);
+  --shadow-md:0 4px 14px rgba(30,35,32,.07), 0 1px 2px rgba(30,35,32,.04);
 }
 body[data-theme="dark"]{
-  --bg:#000000; --surface:#121212; --surface-2:#1A1A1A; --surface-3:#222222;
-  --border:#262626; --border-soft:#1F1F1F;
-  --text:#F5F5F5; --text-dim:#A8A8A8; --text-faint:#5E5E5E;
-  --blue-dim:#142733; --danger-dim:#3A1518; --good-dim:#102B16; --warn-dim:#332907; --purple-dim:#221A33;
+  --bg:#14171A; --surface:#1B1F22; --surface-2:#212629; --surface-3:#282E31;
+  --border:#333A3E; --border-soft:#262C2F;
+  --text:#EBEDE7; --text-dim:#9BA29A; --text-faint:#5C6360;
+  --blue:#5B9BB5; --blue-dim:#1B2E36;
+  --danger:#DC7466; --danger-dim:#332120;
+  --good:#6FB584; --good-dim:#182A1F;
+  --warn:#D2A75B; --warn-dim:#332A18;
+  --copper:#D3895A; --copper-dim:#332419;
+  --purple:#9B98D6; --purple-dim:#232churn1e2e;
+  --grad:linear-gradient(135deg,#5B9BB5 0%,#7A8C7E 45%,#D3895A 100%);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25), 0 1px 0 rgba(0,0,0,.15);
+  --shadow-md:0 4px 16px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.2);
 }
 body{transition:background .15s;}
 *{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased;}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size:34px 34px;
+  background-attachment:fixed;
+}
 button{font-family:inherit;cursor:pointer;}
 input,select,textarea{font-family:inherit;font-size:14px;}
 a{color:var(--blue);}
-::selection{background:var(--purple-dim);}
+::selection{background:var(--copper-dim);}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+h1,h2,h3{font-family:var(--font-display);}
 
 .app{display:flex;min-height:100vh;}
 
@@ -73,6 +93,8 @@ a{color:var(--blue);}
 .banner{display:flex;align-items:center;gap:10px;background:var(--danger-dim);color:#C0202E;border:1px solid #F6C6CB;border-radius:var(--radius);padding:12px 16px;margin-bottom:18px;font-size:13px;font-weight:600;}
 .banner svg{width:16px;height:16px;flex:none;}
 .banner a{color:#C0202E;text-decoration:underline;font-weight:700;}
+.banner.warnb{background:var(--warn-dim);color:#8a5a0f;border-color:#F5DFAE;}
+.banner.warnb a{color:#8a5a0f;}
 
 .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:border-color .12s,background .12s;}
 .btn:hover{background:var(--surface-2);}
@@ -162,7 +184,12 @@ a{color:var(--blue);}
 .fila-info .meta{color:var(--text-faint);font-size:11.5px;margin-top:2px;}
 .fila-info .grams{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);margin-top:6px;}
 .fila-low{border-color:var(--danger);}
+.fila-humid{border-color:var(--warn);}
 .fila-actions{display:flex;flex-direction:column;gap:5px;}
+.fila-flags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+.flag{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em;}
+.flag-low{background:var(--danger-dim);color:var(--danger);}
+.flag-humid{background:var(--warn-dim);color:var(--warn);}
 
 /* ---------- MODELOS ---------- */
 .modelo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -255,12 +282,45 @@ body[data-theme="dark"] .switch::after{left:17px;background:#fff;}
 
 .bottom-nav{display:none;}
 .hidden{display:none !important;}
+
+/* ---------- MODULO 1: FINANZAS/METAS/AMORTIZACION ---------- */
+.goal-wrap{display:flex;flex-direction:column;gap:8px;}
+.goal-top{display:flex;justify-content:space-between;align-items:baseline;}
+.goal-top .amt{font-family:var(--font-mono);font-weight:800;font-size:19px;}
+.goal-top .amt small{font-size:11.5px;color:var(--text-faint);font-weight:600;}
+.goal-bar{height:16px;border-radius:20px;background:var(--surface-3);overflow:hidden;position:relative;}
+.goal-bar-fill{height:100%;background:var(--grad);border-radius:20px;transition:width .6s cubic-bezier(.22,1,.36,1);position:relative;}
+.goal-bar-fill.pulse{animation:goalPulse .9s ease;}
+@keyframes goalPulse{0%{filter:brightness(1);}40%{filter:brightness(1.35);}100%{filter:brightness(1);}}
+.goal-pct{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text-dim);}
+.goal-foot{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.fx-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);}
+.fx-pill{font-family:var(--font-mono);font-weight:700;background:var(--surface-2);padding:3px 9px;border-radius:20px;font-size:12px;}
+.machine-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+.machine-row:last-child{border-bottom:none;}
+.machine-row .m-name{font-weight:700;font-size:13.5px;flex:1;min-width:0;}
+.machine-row .m-sub{font-size:11px;color:var(--text-faint);margin-top:2px;}
+.machine-bar{width:80px;height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden;flex:none;}
+.machine-bar div{height:100%;}
+.mant-ok{background:var(--good);}
+.mant-warn{background:var(--warn);}
+.mant-danger{background:var(--danger);}
+.break-even-wrap{display:flex;flex-direction:column;gap:10px;}
+.be-row{display:flex;align-items:center;gap:10px;}
+.be-label{width:64px;font-size:10.5px;color:var(--text-faint);font-weight:700;text-transform:uppercase;flex:none;}
+.be-track{flex:1;height:22px;background:var(--surface-3);border-radius:6px;overflow:hidden;position:relative;}
+.be-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;}
+.be-fill.ing{background:var(--good);}
+.be-fill.gas{background:var(--danger);}
+.finance-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
 @media (max-width:980px){
   .grid-stats{grid-template-columns:repeat(2,1fr);}
   .dash-grid{grid-template-columns:1fr;}
   .card-row{grid-template-columns:1fr;}
   .fila-grid,.modelo-grid{grid-template-columns:1fr;}
   .calc-wrap{grid-template-columns:1fr;}
+  .finance-grid{grid-template-columns:1fr;}
   .sidebar{display:none;}
   .content{padding-bottom:90px;}
   .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:40;overflow-x:auto;}
@@ -325,6 +385,7 @@ const ICONS = {
   modelos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5M12 12v9"/></svg>',
   leads:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4l-9 9-3-3"/></svg>',
   gastos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  finanzas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><circle cx="19" cy="6" r="1.6"/></svg>',
   config:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>',
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 5v14M5 12h14"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
@@ -334,13 +395,21 @@ const ICONS = {
   alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
   upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0 4 4m-4-4-4 4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
-  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
 };
 
 /* ============ STORAGE ============ */
-const KEYS = {pedidos:'pedidos:list', filamentos:'filamentos:list', modelos:'modelos:list', leads:'leads:list', presupuestos:'presupuestos:list', gastos:'gastos:list', config:'config:data'};
-let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gastos:[], config:{nombreNegocio:'M3diir', instagram:'@m3diir', whatsapp:'', moneda:'$',
-  precioKwh:140, consumoW:120, vidaUtilHoras:4320, costoRepuestos:150000, margenErrorPct:5, margenGanancia:4, markupInsumosPct:30, markupMLPct:20} };
+const KEYS = {pedidos:'pedidos:list', filamentos:'filamentos:list', modelos:'modelos:list', leads:'leads:list', presupuestos:'presupuestos:list', gastos:'gastos:list', maquinas:'maquinas:list', finanzas:'finanzas:data', config:'config:data'};
+let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gastos:[], maquinas:[], finanzas:{ retirosFondo:[], dolar:null },
+  config:{nombreNegocio:'M3diir', instagram:'@m3diir', whatsapp:'', moneda:'$',
+  precioKwh:140, consumoW:120, vidaUtilHoras:4320, costoRepuestos:150000, margenErrorPct:5, margenGanancia:4, markupInsumosPct:30, markupMLPct:20,
+  metaObjetivo:1300000, metaNombre:'Bambu Lab A1 Combo', mermaPct:8, alertaGramos:150, alertaHumedadDias:90} };
+
+const MAQUINAS_DEFAULT = [
+  {id:'ender3v3', nombre:'Ender 3 V3 Plus', horasUso:0, alertaCada:100, ultimaAlertaHoras:0},
+  {id:'bambua1', nombre:'Bambu Lab A1', horasUso:0, alertaCada:300, ultimaAlertaHoras:0}
+];
 
 let storageOk = true;
 try { localStorage.getItem('test'); } catch(e) { storageOk = false; }
@@ -353,10 +422,12 @@ window.storage = {
 };
 
 async function loadAll(){
-  for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos']){
+  for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){
     try{ const r = await window.storage.get(KEYS[k]); DB[k] = r ? JSON.parse(r.value) : []; }catch(e){ DB[k] = []; }
   }
-  try{ const r = await window.storage.get(KEYS.config); if(r) DB.config = JSON.parse(r.value); }catch(e){}
+  if(!DB.maquinas || !DB.maquinas.length) DB.maquinas = MAQUINAS_DEFAULT.map(m=>({...m}));
+  try{ const r = await window.storage.get(KEYS.config); if(r) DB.config = {...DB.config, ...JSON.parse(r.value)}; }catch(e){}
+  try{ const r = await window.storage.get(KEYS.finanzas); if(r) DB.finanzas = {...DB.finanzas, ...JSON.parse(r.value)}; }catch(e){}
 }
 async function save(key){
   try{ const ok = await window.storage.set(KEYS[key], JSON.stringify(DB[key])); if(!ok && storageOk===false) toast('No se pudo guardar. Modo local.'); }catch(e){ toast('No se pudo guardar. Reintentá.'); }
@@ -373,8 +444,64 @@ function toast(msg, actionLabel, actionFn){
 function money(n){ const c = DB.config.moneda || '$'; return c + (Number(n||0)).toLocaleString('es-AR',{maximumFractionDigits:0}); }
 function fmtDate(d){ if(!d) return '—'; const dt = new Date(d+'T00:00:00'); return dt.toLocaleDateString('es-AR',{day:'2-digit',month:'short'}); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
+function daysSince(d){ if(!d) return null; const then = new Date(d+'T00:00:00'); const now = new Date(todayStr()+'T00:00:00'); return Math.round((now-then)/86400000); }
 function esc(s){ return (s===undefined||s===null) ? '' : String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function waDigits(s){ if(!s) return ''; const d = String(s).replace(/[^0-9]/g,''); return d.length>=8 ? d : ''; }
+
+/* ============ MODULO 1: FONDO DE AHORRO (BAMBU-OMETRO) ============ */
+// El fondo se calcula como: total efectivamente cobrado en pedidos (anticipos + pagos completos)
+// menos gastos del taller, menos retiros manuales del fondo. Así el Bambu-Ómetro refleja ahorro neto real.
+function cobradoPedido(p){
+  if(p.estado==='Cancelado') return 0;
+  const total = Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0);
+  if(p.estadoPago==='Pagado completo') return total;
+  if(p.estadoPago==='Seña pagada') return Number(p.anticipo||0);
+  return 0;
+}
+function totalCobrado(){ return DB.pedidos.reduce((s,p)=>s+cobradoPedido(p),0); }
+function totalGastos(){ return DB.gastos.reduce((s,g)=>s+Number(g.monto||0),0); }
+function totalRetiros(){ return (DB.finanzas.retirosFondo||[]).reduce((s,r)=>s+Number(r.monto||0),0); }
+function fondoAhorro(){ return Math.max(0, totalCobrado() - totalGastos() - totalRetiros()); }
+let _lastFondoPct = null;
+async function registrarCobro(pedidoId, montoAnterior){
+  // Se llama al guardar un pedido; si el cobro subió, dispara animación en el dashboard.
+}
+
+/* ============ MODULO 1: COTIZACION DOLAR ============ */
+async function actualizarDolar(){
+  const el = document.getElementById('fxPill');
+  if(el) el.textContent = 'Consultando...';
+  try{
+    const resp = await fetch('https://dolarapi.com/v1/dolares/blue');
+    const data = await resp.json();
+    DB.finanzas.dolar = {compra:data.compra, venta:data.venta, fecha: new Date().toISOString()};
+    await save('finanzas');
+    renderPage();
+    toast('Cotización del dólar actualizada');
+  }catch(e){
+    toast('No se pudo consultar el dólar (revisá tu conexión)');
+    if(el) el.textContent = DB.finanzas.dolar ? money(DB.finanzas.dolar.venta)+' (ant.)' : 'Sin datos';
+  }
+}
+
+/* ============ MODULO 1: MAQUINAS / AMORTIZACION ============ */
+function estadoMantenimiento(m){
+  const desdeUltimo = m.horasUso - (m.ultimaAlertaHoras||0);
+  if(desdeUltimo >= m.alertaCada) return 'danger';
+  if(desdeUltimo >= m.alertaCada*0.8) return 'warn';
+  return 'ok';
+}
+async function sumarHorasMaquina(id, horas){
+  const m = DB.maquinas.find(x=>x.id===id); if(!m) return;
+  m.horasUso = Math.round((Number(m.horasUso||0) + Number(horas||0))*100)/100;
+  await save('maquinas'); renderPage();
+}
+async function marcarMantenimiento(id){
+  const m = DB.maquinas.find(x=>x.id===id); if(!m) return;
+  m.ultimaAlertaHoras = m.horasUso;
+  await save('maquinas'); renderPage();
+  toast('Mantenimiento registrado, contador reiniciado');
+}
 
 /* ============ NAV ============ */
 const SECTIONS = [
@@ -386,6 +513,7 @@ const SECTIONS = [
   {id:'modelos', label:'Modelos', icon:'modelos'},
   {id:'leads', label:'Redes (IG/FB)', icon:'leads'},
   {id:'gastos', label:'Gastos', icon:'gastos'},
+  {id:'finanzas', label:'Finanzas y Metas', icon:'finanzas'},
   {id:'config', label:'Configuración', icon:'config'},
 ];
 let current = 'dashboard';
@@ -394,8 +522,9 @@ function renderNav(){
   nav.innerHTML = SECTIONS.map(s=>{
     let badge='';
     if(s.id==='pedidos'){ const n=DB.pedidos.filter(p=>!['Entregado','Cancelado'].includes(p.estado)).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
-    if(s.id==='filamentos'){ const n=DB.filamentos.filter(lowStock).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='filamentos'){ const n=DB.filamentos.filter(f=>lowStock(f)||humedadRiesgo(f)).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
     if(s.id==='leads'){ const n=DB.leads.filter(l=>!l.respondido).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='finanzas'){ const n=DB.maquinas.filter(m=>estadoMantenimiento(m)==='danger').length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
     return `<button class="nav-item ${s.id===current?'active':''}" onclick="goTo('${s.id}')">${ICONS[s.icon]}<span>${s.label}</span>${badge}</button>`;
   }).join('');
   const bnSections = ['dashboard','pedidos','clientes','leads','config'];
@@ -410,7 +539,8 @@ function renderNav(){
     }).join('');
   }
 }
-function lowStock(f){ return f.pesoTotal>0 && (f.pesoRestante/f.pesoTotal) <= 0.15; }
+function lowStock(f){ if(!f.pesoTotal) return false; const pctBajo = (f.pesoRestante/f.pesoTotal) <= 0.15; const gramosBajo = f.pesoRestante <= (DB.config.alertaGramos||150); return pctBajo || gramosBajo; }
+function humedadRiesgo(f){ const d = daysSince(f.fechaApertura); return d!==null && d >= (DB.config.alertaHumedadDias||90); }
 function isAtrasado(p){ return p.fechaEntrega && p.fechaEntrega < todayStr() && !['Entregado','Cancelado'].includes(p.estado); }
 function goTo(id, opts){ current = id; renderNav(); renderPage(opts); }
 
@@ -425,6 +555,8 @@ const SCHEMAS = {
       {key:'color', label:'Color', type:'text', placeholder:'Ej: Negro mate', row:'c'},
       {key:'cantidad', label:'Cantidad', type:'number', default:1, row:'d'},
       {key:'precio', label:'Precio (solo piezas)', type:'number', default:0, row:'d'},
+      {key:'filamentoId', label:'Filamento usado (para descuento de stock)', type:'select', options:[], row:'k'},
+      {key:'gramosUsados', label:'Gramos a usar (sin merma)', type:'number', default:0, row:'k'},
       {key:'envio', label:'Tipo de Envío', type:'select', options:['Sin envío (retira)','A coordinar','Con envío (costo aparte)'], default:'Sin envío (retira)', row:'e'},
       {key:'costoEnvio', label:'Costo de envío', type:'number', default:0, row:'e'},
       {key:'costoEmbalaje', label:'Costo de embalaje (bolsas, cajas, etc.)', type:'number', default:0, row:'f'},
@@ -443,7 +575,9 @@ const SCHEMAS = {
       {key:'colorHex', label:'Tono', type:'color', default:'#0095F6', row:'b'},
       {key:'pesoTotal', label:'Peso total (g)', type:'number', default:1000, row:'c'},
       {key:'pesoRestante', label:'Peso restante (g)', type:'number', default:1000, row:'c'},
-      {key:'precioKg', label:'Precio por kg', type:'number', default:0},
+      {key:'precioKg', label:'Precio por kg', type:'number', default:0, row:'d'},
+      {key:'tempOptima', label:'Temp. óptima de uso (°C)', type:'number', default:210, row:'d'},
+      {key:'fechaApertura', label:'Fecha de apertura del rollo', type:'date', default:()=>todayStr()},
     ]
   },
   modelo: { title:(e)=> e? 'Editar modelo' : 'Nuevo modelo', fields: [
@@ -474,6 +608,12 @@ const SCHEMAS = {
       {key:'nota', label:'Detalle', type:'text', placeholder:'Ej: Boquilla 0.4mm'},
     ]
   },
+  retiro: { title:(e)=> 'Retiro del fondo de ahorro', fields:[
+      {key:'fecha', label:'Fecha', type:'date', default:()=>todayStr(), row:'a'},
+      {key:'monto', label:'Monto retirado', type:'number', default:0, row:'a'},
+      {key:'nota', label:'Motivo', type:'text', placeholder:'Ej: usé $10.000 para otra cosa'},
+    ]
+  },
 };
 
 function openForm(type, item){
@@ -482,13 +622,17 @@ function openForm(type, item){
   const body = document.getElementById('modalBody');
   const rows = {}; const order = [];
   schema.fields.forEach(f=>{ const r=f.row||f.key; if(!rows[r]){rows[r]=[];order.push(r);} rows[r].push(f); });
-  body.innerHTML = order.map(r=>{ const fs=rows[r]; const inner=fs.map(f=>renderField(f,item)).join(''); return fs.length>1?`<div class="field-row">${inner}</div>`:inner; }).join('');
+  body.innerHTML = order.map(r=>{ const fs=rows[r]; const inner=fs.map(f=>renderField(f,item,type)).join(''); return fs.length>1?`<div class="field-row">${inner}</div>`:inner; }).join('');
   document.getElementById('overlay').classList.add('open');
   document.getElementById('modalSaveBtn').onclick = ()=>saveForm(type, item);
 }
-function renderField(f, item){
+function renderField(f, item, type){
   const val = item ? item[f.key] : (typeof f.default==='function' ? f.default() : f.default);
   const id = 'fld_'+f.key;
+  if(type==='pedido' && f.key==='filamentoId'){
+    const opts = ['<option value="">— ninguno (no descontar stock) —</option>'].concat(DB.filamentos.map(fl=>`<option value="${fl.id}" ${fl.id===val?'selected':''}>${esc(fl.marca||'')} ${esc(fl.tipo)} ${esc(fl.color||'')} (${fl.pesoRestante}g)</option>`));
+    return `<div class="field"><label>${f.label}</label><select id="${id}">${opts.join('')}</select></div>`;
+  }
   if(f.type==='select') return `<div class="field"><label>${f.label}</label><select id="${id}">${f.options.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select></div>`;
   if(f.type==='textarea') return `<div class="field"><label>${f.label}</label><textarea id="${id}">${val||''}</textarea></div>`;
   if(f.type==='checkbox') return `<div class="field field-check"><input type="checkbox" id="${id}" ${val?'checked':''}><label style="margin:0">${f.label}</label></div>`;
@@ -509,13 +653,53 @@ async function saveForm(type, item){
     data[f.key] = v;
   });
   if(!valid){ toast('Completá los campos obligatorios'); return; }
+
+  if(type==='retiro'){
+    DB.finanzas.retirosFondo = DB.finanzas.retirosFondo || [];
+    DB.finanzas.retirosFondo.unshift(data);
+    await save('finanzas');
+    closeModal(); renderPage();
+    toast('Retiro registrado');
+    return;
+  }
+
   const map = {pedido:'pedidos', filamento:'filamentos', modelo:'modelos', lead:'leads', gasto:'gastos'};
   const key = map[type];
   const idx = DB[key].findIndex(x=>x.id===data.id);
+  const prevFondoPct = metaPct();
+  const esNuevo = idx===-1;
+  const estadoAnterior = !esNuevo ? DB[key][idx].estado : null;
+  const yaDescontado = !esNuevo ? DB[key][idx].stockDescontado : false;
+
   if(idx>-1) DB[key][idx]=data; else DB[key].unshift(data);
+
+  // Módulo 2: descuento automático de stock al pasar a Listo/Enviado/Entregado por primera vez
+  if(type==='pedido' && data.filamentoId && data.gramosUsados>0 && !data.stockDescontado){
+    const disparaDescuento = ['Listo','Enviado','Entregado'].includes(data.estado);
+    if(disparaDescuento){
+      const f = DB.filamentos.find(x=>x.id===data.filamentoId);
+      if(f){
+        const merma = Number(DB.config.mermaPct||0);
+        const totalUsar = Number(data.gramosUsados) * (1+merma/100);
+        f.pesoRestante = Math.max(0, Number(f.pesoRestante||0) - totalUsar);
+        await save('filamentos');
+        data.stockDescontado = true;
+        const idx2 = DB[key].findIndex(x=>x.id===data.id);
+        DB[key][idx2] = data;
+        toast(`Stock descontado: ${Math.round(totalUsar)}g de ${f.marca||''} ${f.tipo} (incluye ${merma}% de merma)`);
+      }
+    }
+  }
+
   await save(key);
   closeModal(); renderNav(); renderPage();
-  toast('Guardado');
+
+  // Módulo 1: animación del Bambu-Ómetro si el fondo subió (pedido marcado como cobrado)
+  if(type==='pedido'){
+    const newPct = metaPct();
+    if(newPct > prevFondoPct) setTimeout(()=>{ const el=document.getElementById('goalFill'); if(el){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); } }, 50);
+  }
+  if(!(type==='pedido' && data.filamentoId && data.gramosUsados>0)) toast('Guardado');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
 function closeModalConfirm(){
@@ -544,6 +728,7 @@ function renderPage(opts){
     presupuestos:['Presupuestos','Calculá precios y guardalos'], modelos:['Modelos','Tu catálogo de piezas listas para vender'],
     leads:['Redes (Instagram / Facebook)','Seguimiento manual de mensajes y publicaciones'],
     gastos:['Gastos','Lo que sale del bolsillo del taller'],
+    finanzas:['Finanzas y Metas','Bambu-Ómetro, dólar, máquinas y punto de equilibrio'],
     config:['Configuración','Datos de tu negocio, valores por defecto y backup']};
   document.getElementById('pageTitle').textContent = titles[current][0];
   document.getElementById('pageSub').textContent = titles[current][1];
@@ -558,6 +743,7 @@ function renderPage(opts){
   else if(current==='modelos'){ actions.innerHTML = addBtn('modelo','Nuevo modelo'); content.innerHTML = renderModelos(); }
   else if(current==='leads'){ actions.innerHTML = addBtn('lead','Nuevo contacto'); content.innerHTML = renderLeads(); }
   else if(current==='gastos'){ actions.innerHTML = addBtn('gasto','Nuevo gasto'); content.innerHTML = renderGastos(); }
+  else if(current==='finanzas'){ actions.innerHTML=''; content.innerHTML = renderFinanzas(); }
   else if(current==='config'){ actions.innerHTML=''; content.innerHTML = renderConfig(); }
 }
 function addBtn(type,label){ return `<button class="btn btn-primary" onclick="openForm('${type}')">${ICONS.plus}${label}</button>`; }
@@ -573,29 +759,33 @@ function waBtn(contacto, msg){
 }
 
 /* ---- Dashboard ---- */
+function metaPct(){ const obj = Number(DB.config.metaObjetivo||0); if(!obj) return 0; return Math.min(100, Math.round((fondoAhorro()/obj)*1000)/10); }
 function renderDashboard(){
   const activos = DB.pedidos.filter(p=>!['Entregado','Cancelado'].includes(p.estado));
   const atrasados = DB.pedidos.filter(isAtrasado);
   const esteMes = todayStr().slice(0,7);
   const ingresosMes = DB.pedidos.filter(p=>p.fecha && p.fecha.startsWith(esteMes) && p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
   const gastosMes = DB.gastos.filter(g=>g.fecha && g.fecha.startsWith(esteMes)).reduce((s,g)=>s+Number(g.monto||0),0);
-  const bajoStock = DB.filamentos.filter(lowStock);
+  const bajoStock = DB.filamentos.filter(f=>lowStock(f)||humedadRiesgo(f));
   const sinResponder = DB.leads.filter(l=>!l.respondido);
   const proximas = activos.filter(p=>p.fechaEntrega && p.fechaEntrega>=todayStr()).sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega)).slice(0,5);
-  
+  const maquinasCriticas = DB.maquinas.filter(m=>estadoMantenimiento(m)==='danger');
+
   const porCobrar = DB.pedidos.filter(p=>p.estado!=='Cancelado' && p.estadoPago!=='Pagado completo').reduce((s,p)=>{
     const calcTotal = Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0);
     return s + (calcTotal - Number(p.anticipo||0));
   },0);
 
-  const bannerHtml = atrasados.length ? `<div class="banner">${ICONS.alert}Tenés ${atrasados.length} pedido(s) atrasado(s) — <a onclick="goTo('pedidos')" style="cursor:pointer">verlos</a></div>` : '';
+  let bannerHtml = '';
+  if(atrasados.length) bannerHtml += `<div class="banner">${ICONS.alert}Tenés ${atrasados.length} pedido(s) atrasado(s) — <a onclick="goTo('pedidos')" style="cursor:pointer">verlos</a></div>`;
+  if(maquinasCriticas.length) bannerHtml += `<div class="banner warnb">${ICONS.alert}${maquinasCriticas.map(m=>m.nombre).join(', ')} necesita mantenimiento — <a onclick="goTo('finanzas')" style="cursor:pointer">ver detalle</a></div>`;
 
   const stats = `<div class="grid-stats">
     <div class="stat-card"><div class="label">Pedidos activos</div><div class="value">${activos.length}</div><div class="foot">${DB.pedidos.length} en total</div></div>
     <div class="stat-card"><div class="label">Ingresos del mes</div><div class="value grad">${money(ingresosMes)}</div><div class="foot">pedidos no cancelados</div></div>
     <div class="stat-card"><div class="label">Ganancia neta del mes</div><div class="value ${ (ingresosMes-gastosMes)<0?'danger':'' }">${money(ingresosMes-gastosMes)}</div><div class="foot">ingresos − gastos</div></div>
     <div class="stat-card"><div class="label">Por cobrar</div><div class="value ${porCobrar>0?'warn':''}">${money(porCobrar)}</div><div class="foot">señas y saldos pendientes</div></div>
-    <div class="stat-card"><div class="label">Filamento bajo</div><div class="value ${bajoStock.length?'warn':''}">${bajoStock.length}</div><div class="foot">carretes bajo 15%</div></div>
+    <div class="stat-card"><div class="label">Filamento bajo</div><div class="value ${bajoStock.length?'warn':''}">${bajoStock.length}</div><div class="foot">bajo stock o riesgo humedad</div></div>
   </div>`;
 
   const proxPedidos = activos.slice(0,5).map(p=>`<div class="mini-row"><div><div class="t">${esc(p.cliente)} — ${esc(p.modelo||'sin modelo')}</div><div class="s">${fmtDate(p.fecha)} · ${p.origen||''}</div></div>${badge(p.estado)}</div>`).join('') || emptyBlock('Sin pedidos activos','Cuando crees un pedido, aparece acá.');
@@ -611,6 +801,9 @@ function renderDashboard(){
     return arr.map(([name,n])=>`<div class="mini-row"><div class="t">${esc(name)}</div><div style="flex:1;margin:0 12px;height:6px;background:var(--surface-3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${Math.round((n/max)*100)}%;background:var(--grad);"></div></div><span class="cell-val">${n}</span></div>`).join('');
   })();
 
+  const pct = metaPct();
+  const goalPanel = `<div class="panel"><h3>Bambu-Ómetro <a onclick="goTo('finanzas')">ver finanzas →</a></h3>${renderGoal(pct)}</div>`;
+
   return bannerHtml + stats + `
   <div class="dash-grid">
     <div class="panel"><h3>Pedidos activos <a onclick="goTo('pedidos')">ver todos →</a></h3>${proxPedidos}</div>
@@ -621,10 +814,33 @@ function renderDashboard(){
     <div class="panel"><h3>Stock de filamento <a onclick="goTo('filamentos')">ver todo →</a></h3>${stockList}</div>
   </div>
   <div class="dash-grid" style="margin-top:16px;">
-    <div class="panel"><h3>Piezas más pedidas</h3>${topModelos}</div>
+    ${goalPanel}
     <div class="panel"><h3>Sin responder en redes <a onclick="goTo('leads')">ver todo →</a></h3>${leadsList}</div>
   </div>
+  <div class="dash-grid" style="margin-top:16px;">
+    <div class="panel"><h3>Piezas más pedidas</h3>${topModelos}</div>
+    <div class="panel"><h3>Máquinas <a onclick="goTo('finanzas')">ver todo →</a></h3>${renderMaquinasList()}</div>
+  </div>
   `;
+}
+function renderGoal(pct){
+  const objetivo = Number(DB.config.metaObjetivo||0);
+  const fondo = fondoAhorro();
+  const falta = Math.max(0, objetivo-fondo);
+  return `<div class="goal-wrap">
+    <div class="goal-top"><div class="amt">${money(fondo)} <small>de ${money(objetivo)}</small></div><span class="goal-pct">${pct}%</span></div>
+    <div class="goal-bar"><div class="goal-bar-fill" id="goalFill" style="width:${pct}%"></div></div>
+    <div class="goal-foot"><span>Meta: ${esc(DB.config.metaNombre||'Sin definir')}</span><span>Faltan ${money(falta)}</span></div>
+  </div>`;
+}
+function renderMaquinasList(){
+  if(!DB.maquinas.length) return emptyBlock('Sin máquinas cargadas','Agregalas desde Finanzas y Metas.');
+  return DB.maquinas.map(m=>{
+    const st = estadoMantenimiento(m);
+    const desde = m.horasUso - (m.ultimaAlertaHoras||0);
+    const pct = Math.min(100, Math.round((desde/m.alertaCada)*100));
+    return `<div class="machine-row"><div><div class="m-name">${esc(m.nombre)}</div><div class="m-sub">${m.horasUso}hs totales · ${Math.round(desde)}hs desde último mantenimiento</div></div><div class="machine-bar"><div class="${st==='danger'?'mant-danger':st==='warn'?'mant-warn':'mant-ok'}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
 }
 function renderChart(){
   const months = [];
@@ -702,7 +918,7 @@ function renderPedidos(){
 }
 async function duplicarPedido(id){
   const p = DB.pedidos.find(x=>x.id===id); if(!p) return;
-  const copy = {...p, id:uid(), fecha:todayStr(), fechaEntrega:'', estado:'Pendiente', estadoPago:'Sin seña', anticipo:0};
+  const copy = {...p, id:uid(), fecha:todayStr(), fechaEntrega:'', estado:'Pendiente', estadoPago:'Sin seña', anticipo:0, stockDescontado:false};
   DB.pedidos.unshift(copy);
   await save('pedidos'); renderNav(); renderPage();
   toast('Pedido duplicado');
@@ -759,12 +975,16 @@ function renderFilamentos(){
   const cards = list.map(f=>{
     const pct = f.pesoTotal? Math.round((f.pesoRestante/f.pesoTotal)*100):0;
     const low = lowStock(f);
-    return `<div class="fila-card ${low?'fila-low':''}">
+    const humid = humedadRiesgo(f);
+    const dias = daysSince(f.fechaApertura);
+    const flags = (low?`<span class="flag flag-low">Stock bajo</span>`:'') + (humid?`<span class="flag flag-humid">Riesgo humedad (${dias}d)</span>`:'');
+    return `<div class="fila-card ${low?'fila-low':humid?'fila-humid':''}">
       <div class="spool" style="background:conic-gradient(${f.colorHex||'#0095F6'} 0 ${pct}%, var(--surface-3) ${pct}% 100%);"><span class="pct">${pct}%</span></div>
       <div class="fila-info">
         <div class="name">${esc(f.marca||'')} ${esc(f.tipo)}</div>
-        <div class="meta">${esc(f.color||'')} ${low?' · stock bajo':''}</div>
+        <div class="meta">${esc(f.color||'')}${f.tempOptima?' · '+f.tempOptima+'°C':''}</div>
         <div class="grams">${f.pesoRestante}g / ${f.pesoTotal}g · ${money(f.precioKg)}/kg</div>
+        ${flags?`<div class="fila-flags">${flags}</div>`:''}
       </div>
       <div class="fila-actions">
         <button class="btn btn-ghost btn-sm" onclick="usarFilamento('${f.id}')">− Usar</button>
@@ -777,13 +997,15 @@ function renderFilamentos(){
 }
 async function usarFilamento(id){
   const f = DB.filamentos.find(x=>x.id===id); if(!f) return;
-  const g = prompt(`¿Cuántos gramos de "${f.marca||''} ${f.tipo}" usaste?`, '20');
+  const g = prompt(`¿Cuántos gramos de "${f.marca||''} ${f.tipo}" usaste (sin contar merma)?`, '20');
   if(g===null) return;
   const n = Number(g);
   if(isNaN(n) || n<=0){ toast('Cantidad inválida'); return; }
-  f.pesoRestante = Math.max(0, Number(f.pesoRestante||0) - n);
+  const merma = Number(DB.config.mermaPct||0);
+  const total = n*(1+merma/100);
+  f.pesoRestante = Math.max(0, Number(f.pesoRestante||0) - total);
   await save('filamentos'); renderNav(); renderPage();
-  toast(`Restados ${n}g`);
+  toast(`Restados ${Math.round(total)}g (incluye ${merma}% merma)`);
 }
 
 /* ---- Modelos ---- */
@@ -934,6 +1156,8 @@ function attachCalc(){
 }
 function updateCalc(){
   const r = calcTotal();
+  const dolar = DB.finanzas.dolar;
+  const usdLine = dolar && dolar.venta ? `<div class="result-line" style="border-top:1px dashed var(--border);padding-top:10px;margin-top:4px;"><span>≈ en USD (blue ${money(dolar.venta)})</span><span class="v">u$s ${(r.totalACobrar/dolar.venta).toLocaleString('es-AR',{maximumFractionDigits:2})}</span></div>` : '';
   document.getElementById('calcResult').innerHTML = `
     <h3>Presupuesto</h3>
     <div class="result-line"><span>Precio material (${r.gramos}g)</span><span class="v">${money(r.precioMaterial)}</span></div>
@@ -944,6 +1168,7 @@ function updateCalc(){
     <div class="result-line"><span>Insumos (+${r.markupInsumosPct}%)</span><span class="v">${money(r.insumosConMarkup)}</span></div>
     <div class="result-line"><span>Envío</span><span class="v">${money(r.envio)}</span></div>
     <div class="result-total"><span class="l">Total a cobrar (×${r.margen})</span><span class="v">${money(r.totalACobrar)}</span></div>
+    ${usdLine}
     <div style="background:var(--warn-dim);border:1px solid #F5DFAE;border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;">
       <div style="font-size:10.5px;color:var(--warn);font-weight:700;text-transform:uppercase;">Precio sugerido MercadoLibre (+${r.markupMLPct}%)</div>
       <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--warn);">${money(r.precioML)}</div>
@@ -960,6 +1185,81 @@ function copiarPresupuesto(){
   const r = calcTotal();
   const txt = `Hola! Te paso el presupuesto:\n· Pieza: ${r.fila? (r.fila.marca+' '+r.fila.tipo) : 'a definir'}\n· Tiempo estimado: ${r.horas} hs\n· Total: ${money(Math.round(r.totalACobrar))}\n¿Confirmamos el pedido?`;
   navigator.clipboard.writeText(txt).then(()=>toast('Copiado, pegalo en WhatsApp')).catch(()=>toast('No se pudo copiar'));
+}
+
+/* ---- Finanzas y Metas (Módulo 1) ---- */
+function renderFinanzas(){
+  const pct = metaPct();
+  const dolar = DB.finanzas.dolar;
+  const fxLine = dolar ? `<span class="fx-pill">Compra ${money(dolar.compra)}</span><span class="fx-pill">Venta ${money(dolar.venta)}</span><span style="color:var(--text-faint);font-size:11px;">act. ${new Date(dolar.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : `<span style="color:var(--text-faint);">Sin consultar todavía</span>`;
+
+  const retiros = (DB.finanzas.retirosFondo||[]).slice(0,6).map(r=>`<div class="mini-row"><div><div class="t">${money(r.monto)}</div><div class="s">${esc(r.nota||'')} · ${fmtDate(r.fecha)}</div></div></div>`).join('') || emptyBlock('Sin retiros','El fondo crece solo con lo cobrado en pedidos.');
+
+  const goalPanel = `<div class="panel">
+    <h3>Bambu-Ómetro <a onclick="openForm('retiro')" style="cursor:pointer">+ registrar retiro</a></h3>
+    ${renderGoal(pct)}
+    <div style="margin-top:16px;">${retiros}</div>
+  </div>`;
+
+  const fxPanel = `<div class="panel">
+    <h3>Cotización del dólar (Blue)</h3>
+    <div class="fx-row" id="fxRow">${fxLine}</div>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="actualizarDolar()">${ICONS.download} Actualizar cotización</button>
+    <div class="info-box" style="margin-top:12px;">Se usa para mostrar el total del presupuesto también en dólares (fuente: DolarAPI.com).</div>
+  </div>`;
+
+  const maquinasPanel = `<div class="panel">
+    <h3>Máquinas y amortización</h3>
+    ${DB.maquinas.map(m=>{
+      const st = estadoMantenimiento(m);
+      const desde = m.horasUso - (m.ultimaAlertaHoras||0);
+      const pctm = Math.min(100, Math.round((desde/m.alertaCada)*100));
+      return `<div class="machine-row">
+        <div><div class="m-name">${esc(m.nombre)}</div><div class="m-sub">${m.horasUso}hs totales · alerta cada ${m.alertaCada}hs · ${Math.round(desde)}hs desde el último mantenimiento</div></div>
+        <div class="machine-bar"><div class="${st==='danger'?'mant-danger':st==='warn'?'mant-warn':'mant-ok'}" style="width:${pctm}%"></div></div>
+        <div class="row-actions">
+          <button class="btn btn-ghost btn-sm" title="Sumar horas de impresión" onclick="promptSumarHoras('${m.id}')">${ICONS.clock}</button>
+          <button class="btn btn-ghost btn-sm" title="Marcar mantenimiento hecho" onclick="marcarMantenimiento('${m.id}')">✓</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  const beData = breakEvenData();
+  const beMax = Math.max(1, ...beData.map(d=>Math.max(d.ing,d.gas)));
+  const bePanel = `<div class="panel">
+    <h3>Punto de equilibrio (últimos 6 meses)</h3>
+    <div class="break-even-wrap">
+      ${beData.map(d=>`
+        <div class="be-row"><span class="be-label">${d.label} ing.</span><div class="be-track"><div class="be-fill ing" style="width:${Math.max(4,Math.round((d.ing/beMax)*100))}%">${money(d.ing)}</div></div></div>
+        <div class="be-row"><span class="be-label">${d.label} cost.</span><div class="be-track"><div class="be-fill gas" style="width:${Math.max(4,Math.round((d.gas/beMax)*100))}%">${money(d.gas)}</div></div></div>
+      `).join('')}
+    </div>
+    <div class="info-box" style="margin-top:12px;">"Costos" acá suma tus gastos reales del mes más una estimación de luz y desgaste de máquina por las horas cargadas. El mes en que la barra verde supera a la roja, estás ganando plata neta.</div>
+  </div>`;
+
+  return `<div class="finance-grid">${goalPanel}${fxPanel}</div><div class="finance-grid" style="margin-top:16px;">${maquinasPanel}${bePanel}</div>`;
+}
+function promptSumarHoras(id){
+  const h = prompt('¿Cuántas horas de impresión sumar a esta máquina?', '3');
+  if(h===null) return;
+  const n = Number(h);
+  if(isNaN(n) || n<=0){ toast('Cantidad inválida'); return; }
+  sumarHorasMaquina(id, n);
+}
+function breakEvenData(){
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(d.toISOString().slice(0,7)); }
+  const horasTotalMes = DB.maquinas.reduce((s,m)=>s+Number(m.horasUso||0),0) / 6; // estimación pareja si no hay más detalle
+  return months.map(m=>{
+    const ing = DB.pedidos.filter(p=>p.fecha&&p.fecha.startsWith(m)&&p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
+    const gastosReales = DB.gastos.filter(g=>g.fecha&&g.fecha.startsWith(m)).reduce((s,g)=>s+Number(g.monto||0),0);
+    const luzEstim = (Number(DB.config.consumoW||0)/1000)*horasTotalMes*Number(DB.config.precioKwh||0);
+    const desgasteEstim = Number(DB.config.vidaUtilHoras||0)>0 ? (Number(DB.config.costoRepuestos||0)/Number(DB.config.vidaUtilHoras||0))*horasTotalMes : 0;
+    const label = new Date(m+'-01').toLocaleDateString('es-AR',{month:'short'}).replace('.','');
+    return {label, ing, gas: gastosReales+luzEstim+desgasteEstim};
+  });
 }
 
 /* ---- Config ---- */
@@ -998,6 +1298,21 @@ function renderConfig(){
     <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
   </div>
   <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Meta de ahorro (Bambu-Ómetro)</h3>
+    <div class="field"><label>Qué estás ahorrando</label><input id="cfMetaNombre" type="text" value="${esc(c.metaNombre)}"></div>
+    <div class="field"><label>Objetivo ($)</label><input id="cfMetaObjetivo" type="number" value="${c.metaObjetivo}"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar meta</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Stock de filamento e insumos</h3>
+    <div class="field-row">
+      <div class="field"><label>% de merma por defecto (soportes/faldas)</label><input id="cfMerma" type="number" value="${c.mermaPct!==undefined?c.mermaPct:8}"></div>
+      <div class="field"><label>Alertar stock bajo desde (g)</label><input id="cfAlertaG" type="number" value="${c.alertaGramos!==undefined?c.alertaGramos:150}"></div>
+    </div>
+    <div class="field"><label>Alertar riesgo de humedad después de (días abierto)</label><input id="cfAlertaDias" type="number" value="${c.alertaHumedadDias!==undefined?c.alertaHumedadDias:90}" style="max-width:160px;"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
     <h3>Backup de tus datos</h3>
     <div class="info-box">Todo se guarda solo en este navegador. Si cambiás de compu, borrás el historial, o querés tener una copia de seguridad, exportá un archivo y guardalo en tu Google Drive o donde prefieras.</div>
     <div class="backup-actions">
@@ -1007,22 +1322,29 @@ function renderConfig(){
   </div>`;
 }
 async function saveConfig(){
+  const get = id => document.getElementById(id);
   DB.config = {
     ...DB.config,
-    nombreNegocio: document.getElementById('cfNombre').value,
-    instagram: document.getElementById('cfIg').value,
-    whatsapp: document.getElementById('cfWa').value,
-    moneda: document.getElementById('cfMoneda').value || '$',
-    precioKwh: Number(document.getElementById('cfKwh').value||0),
-    consumoW: Number(document.getElementById('cfW').value||0),
-    vidaUtilHoras: Number(document.getElementById('cfVida').value||0),
-    costoRepuestos: Number(document.getElementById('cfRepuestos').value||0),
-    margenErrorPct: Number(document.getElementById('cfErrorPct').value||0),
-    margenGanancia: Number(document.getElementById('cfMargen').value||4),
-    markupInsumosPct: Number(document.getElementById('cfInsumosPct').value||30),
-    markupMLPct: Number(document.getElementById('cfMLPct').value||20),
+    nombreNegocio: get('cfNombre') ? get('cfNombre').value : DB.config.nombreNegocio,
+    instagram: get('cfIg') ? get('cfIg').value : DB.config.instagram,
+    whatsapp: get('cfWa') ? get('cfWa').value : DB.config.whatsapp,
+    moneda: (get('cfMoneda') ? get('cfMoneda').value : DB.config.moneda) || '$',
+    precioKwh: get('cfKwh') ? Number(get('cfKwh').value||0) : DB.config.precioKwh,
+    consumoW: get('cfW') ? Number(get('cfW').value||0) : DB.config.consumoW,
+    vidaUtilHoras: get('cfVida') ? Number(get('cfVida').value||0) : DB.config.vidaUtilHoras,
+    costoRepuestos: get('cfRepuestos') ? Number(get('cfRepuestos').value||0) : DB.config.costoRepuestos,
+    margenErrorPct: get('cfErrorPct') ? Number(get('cfErrorPct').value||0) : DB.config.margenErrorPct,
+    margenGanancia: get('cfMargen') ? Number(get('cfMargen').value||4) : DB.config.margenGanancia,
+    markupInsumosPct: get('cfInsumosPct') ? Number(get('cfInsumosPct').value||30) : DB.config.markupInsumosPct,
+    markupMLPct: get('cfMLPct') ? Number(get('cfMLPct').value||20) : DB.config.markupMLPct,
+    metaNombre: get('cfMetaNombre') ? get('cfMetaNombre').value : DB.config.metaNombre,
+    metaObjetivo: get('cfMetaObjetivo') ? Number(get('cfMetaObjetivo').value||0) : DB.config.metaObjetivo,
+    mermaPct: get('cfMerma') ? Number(get('cfMerma').value||0) : DB.config.mermaPct,
+    alertaGramos: get('cfAlertaG') ? Number(get('cfAlertaG').value||150) : DB.config.alertaGramos,
+    alertaHumedadDias: get('cfAlertaDias') ? Number(get('cfAlertaDias').value||90) : DB.config.alertaHumedadDias,
   };
   await save('config');
+  renderNav(); renderPage();
   toast('Configuración guardada');
 }
 function exportarBackup(){
@@ -1040,8 +1362,9 @@ async function importarBackup(ev){
   try{
     const text = await file.text();
     const parsed = JSON.parse(text);
-    for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos']){ DB[k] = parsed[k]||[]; await save(k); }
+    for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){ DB[k] = parsed[k]||(k==='maquinas'?MAQUINAS_DEFAULT.map(m=>({...m})):[]); await save(k); }
     DB.config = parsed.config || DB.config; await save('config');
+    DB.finanzas = parsed.finanzas || DB.finanzas; await save('finanzas');
     renderNav(); renderPage();
     toast('Backup restaurado');
   }catch(e){ toast('El archivo no es un backup válido'); }
