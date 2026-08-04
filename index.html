@@ -1,743 +1,1400 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M3DIIR Studio · J.A.R.V.I.S. OS</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<title>M3DIIR · Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#07101B; --bg2:#0A1520; --card:#0D1E2D; --card2:#111F30; --card3:#152435;
-  --bd:#162540; --bd2:#1C2E44;
-  --teal:#06C8D8; --teal2:#04A0AE; --teal-glow:rgba(6,200,216,.18);
-  --red:#EF4444; --green:#10B981; --amber:#F59E0B; --purple:#8B5CF6; --blue:#3B82F6;
-  --tx:#D8EAF5; --tx2:#5E7E96; --tx3:#2E4A60;
-  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
-  --r:12px; --r-sm:8px; --r-lg:16px;
-  --sh:0 4px 24px rgba(0,0,0,.45); --sb:200px;
+  --bg:#F2F3EE; --surface:#FFFFFF; --surface-2:#EAEBE3; --surface-3:#DFE1D6;
+  --border:#D6D8CB; --border-soft:#E7E8DF;
+  --text:#1E2320; --text-dim:#72786C; --text-faint:#A7AC9C;
+  --blue:#2C5F76; --blue-dim:#E1EBEE;
+  --danger:#BC4438; --danger-dim:#F6E3DF;
+  --good:#3E7C50; --good-dim:#E5F0E7;
+  --warn:#A47728; --warn-dim:#F3ECD9;
+  --copper:#AD5A2C; --copper-dim:#F3E3D6;
+  --purple:#5C5A9C; --purple-dim:#E9E8F3;
+  --grad:linear-gradient(135deg,#2C5F76 0%,#5C6E63 45%,#AD5A2C 100%);
+  --radius:10px; --radius-sm:7px;
+  --font:'Inter',sans-serif; --font-display:'Space Grotesk','Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 2px rgba(30,35,32,.05), 0 1px 0 rgba(30,35,32,.03);
+  --shadow-md:0 4px 14px rgba(30,35,32,.07), 0 1px 2px rgba(30,35,32,.04);
 }
-[data-theme="light"]{
-  --bg:#EEF3FA; --bg2:#E4EDF6; --card:#FFFFFF; --card2:#F5F8FC; --card3:#EBF1F8;
-  --bd:#C8D8E8; --bd2:#B8CAD8;
-  --tx:#1A2A3A; --tx2:#5A7085; --tx3:#90A8BE;
+body[data-theme="dark"]{
+  --bg:#14171A; --surface:#1B1F22; --surface-2:#212629; --surface-3:#282E31;
+  --border:#333A3E; --border-soft:#262C2F;
+  --text:#EBEDE7; --text-dim:#9BA29A; --text-faint:#5C6360;
+  --blue:#5B9BB5; --blue-dim:#1B2E36;
+  --danger:#DC7466; --danger-dim:#332120;
+  --good:#6FB584; --good-dim:#182A1F;
+  --warn:#D2A75B; --warn-dim:#332A18;
+  --copper:#D3895A; --copper-dim:#332419;
+  --purple:#9B98D6; --purple-dim:#232churn1e2e;
+  --grad:linear-gradient(135deg,#5B9BB5 0%,#7A8C7E 45%,#D3895A 100%);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25), 0 1px 0 rgba(0,0,0,.15);
+  --shadow-md:0 4px 16px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.2);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--font);font-size:13px;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;}
+body{transition:background .15s;}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size:34px 34px;
+  background-attachment:fixed;
+}
 button{font-family:inherit;cursor:pointer;}
-input,select,textarea{font-family:inherit;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+a{color:var(--blue);}
+::selection{background:var(--copper-dim);}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+h1,h2,h3{font-family:var(--font-display);}
 
-.app{display:flex;height:100vh;overflow:hidden;}
-.sidebar{width:var(--sb);flex:0 0 var(--sb);background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.app{display:flex;min-height:100vh;}
 
-.sb-top{padding:16px 14px 12px;border-bottom:1px solid var(--bd);}
-.sb-logo{display:flex;align-items:center;gap:9px;}
-.logo-box{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#0480A8);display:flex;align-items:center;justify-content:center;flex:none;}
-.logo-box svg{width:14px;height:14px;color:#fff;}
-.logo-txt{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--tx);}
-.logo-sub{font-size:9px;color:var(--tx2);font-family:var(--mono);margin-top:1px;letter-spacing:.05em;}
-.sb-nav{flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
-.nav-lbl{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;padding:10px 8px 5px;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);border:none;background:none;color:var(--tx2);text-align:left;font-size:12px;font-weight:500;width:100%;cursor:pointer;transition:all .12s;}
-.nav-item svg{width:14px;height:14px;flex:none;}
-.nav-item:hover{background:var(--card);color:var(--tx);}
-.nav-item.active{background:rgba(6,200,216,.12);color:var(--teal);font-weight:600;}
-.nav-badge{margin-left:auto;font-family:var(--mono);font-size:10px;background:var(--red);color:#fff;padding:1px 6px;border-radius:10px;}
-.fila-dot-row{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 28px;font-size:11px;color:var(--tx2);}
-.fila-dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid rgba(255,255,255,.2);}
+/* ---------- SIDEBAR ---------- */
+.sidebar{width:230px;flex:0 0 230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;}
+.brand{padding:0 8px 18px 8px;}
+.brand-mark{display:flex;align-items:center;gap:10px;}
+.ring{width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;flex:none;padding:2.5px;}
+.ring-inner{width:100%;height:100%;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;}
+.ring-inner svg{width:18px;height:18px;color:var(--text);}
+.brand-name{font-weight:800;font-size:16.5px;letter-spacing:-.01em;}
+.brand-sub{font-size:11px;color:var(--text-dim);margin-top:1px;}
+.quicklinks{display:flex;gap:7px;margin-top:14px;}
+.qlink{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:var(--radius-sm);background:var(--surface-2);text-decoration:none;color:var(--text-dim);font-size:9.5px;font-weight:600;transition:background .12s;}
+.qlink:hover{background:var(--surface-3);}
+.qlink svg{width:16px;height:16px;}
+.qlink.ig svg{color:#C13584;}
+.qlink.fb svg{color:#0866FF;}
+.qlink.mk svg{color:#0866FF;}
 
-.topbar{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0;}
-.tb-title{font-size:12px;font-weight:700;color:var(--tx);white-space:nowrap;letter-spacing:.05em;}
-.tb-grow{flex:1;}
-.tb-search{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r-sm);padding:6px 12px;min-width:220px;}
-.tb-search svg{width:12px;height:12px;color:var(--tx2);}
-.tb-search input{background:none;border:none;color:var(--tx);font-size:12px;width:100%;outline:none;}
-.tb-btn{width:30px;height:30px;border-radius:7px;background:var(--card);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);}
-.tb-btn:hover{background:var(--card2);color:var(--tx);}
-.tb-avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex:none;}
-.undo-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r-sm);background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);color:var(--purple);font-size:11px;font-weight:600;cursor:pointer;}
-.undo-btn:disabled{opacity:.35;cursor:not-allowed;}
+.nav{display:flex;flex-direction:column;gap:1px;margin-top:16px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);background:none;border:none;color:var(--text-dim);text-align:left;font-size:13.5px;font-weight:600;transition:background .12s,color .12s;}
+.nav-item svg{width:17px;height:17px;flex:none;}
+.nav-item:hover{background:var(--surface-2);color:var(--text);}
+.nav-item.active{background:var(--surface-2);color:var(--text);}
+.nav-item.active svg{color:var(--blue);}
+.nav-badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;font-weight:700;background:var(--danger);color:#fff;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center;}
+.nav-spacer{flex:1;}
+.nav-foot{padding:12px 8px 0;border-top:1px solid var(--border-soft);margin-top:10px;font-size:10.5px;color:var(--text-faint);line-height:1.6;}
 
-.content-area{flex:1;overflow:auto;padding:16px;}
-.dashboard-grid{display:grid;grid-template-columns:1fr 280px;gap:16px;}
-.center-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
-.right-col{display:flex;flex-direction:column;gap:14px;}
+/* ---------- MAIN ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:5;}
+.topbar h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em;}
+.topbar .sub{color:var(--text-dim);font-size:12.5px;margin-top:3px;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.content{padding:22px 28px 60px;flex:1;}
 
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.sec-title{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;}
-.sec-title .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);}
+.banner{display:flex;align-items:center;gap:10px;background:var(--danger-dim);color:#C0202E;border:1px solid #F6C6CB;border-radius:var(--radius);padding:12px 16px;margin-bottom:18px;font-size:13px;font-weight:600;}
+.banner svg{width:16px;height:16px;flex:none;}
+.banner a{color:#C0202E;text-decoration:underline;font-weight:700;}
+.banner.warnb{background:var(--warn-dim);color:#8a5a0f;border-color:#F5DFAE;}
+.banner.warnb a{color:#8a5a0f;}
 
-.printer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.printer-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);overflow:hidden;}
-.printer-card.active-printer{border-color:rgba(6,200,216,.35);box-shadow:0 0 12px rgba(6,200,216,.08);}
-.pc-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bd);}
-.pc-title{font-size:12px;font-weight:700;}
-.pc-sub{font-size:10px;color:var(--tx2);}
-.pc-toggle{width:36px;height:20px;border-radius:20px;border:none;cursor:pointer;position:relative;transition:background .2s;}
-.pc-toggle.on{background:var(--teal);}
-.pc-toggle.off{background:var(--bd2);}
-.pc-toggle::after{content:'';width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:left .2s;}
-.pc-toggle.on::after{left:19px;}
-.pc-toggle.off::after{left:3px;}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;transition:border-color .12s,background .12s;}
+.btn:hover{background:var(--surface-2);}
+.btn svg{width:14px;height:14px;}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:#1AA1FF;}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-dim);}
+.btn-ghost:hover{color:var(--text);background:var(--surface-2);}
+.btn-sm{padding:5px 9px;font-size:12px;}
+.btn-danger-text{color:var(--danger);}
+.btn-wa{background:#25D366;color:#fff;border-color:#25D366;}
+.btn-wa:hover{background:#22c35e;}
 
-.printer-preview{height:110px;background:var(--card2);display:flex;align-items:center;justify-content:center;position:relative;}
-.live-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;}
-.live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+/* ---------- DASHBOARD ---------- */
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.stat-card .label{font-size:11.5px;color:var(--text-dim);font-weight:600;}
+.stat-card .value{font-family:var(--font-mono);font-size:25px;font-weight:700;margin-top:8px;}
+.stat-card .value.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.stat-card .value.danger{color:var(--danger);}
+.stat-card .value.warn{color:var(--warn);}
+.stat-card .foot{font-size:11px;color:var(--text-faint);margin-top:4px;}
 
-.printer-temp-zone{padding:10px 14px;}
-.temp-val{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal);}
-.progress-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bd);}
-.progress-bar{flex:1;height:5px;background:var(--bd2);border-radius:3px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),#04E8F8);transition:width .4s;}
+.dash-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+.panel h3{font-size:14.5px;margin:0 0 14px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
+.panel h3 a{font-size:11.5px;color:var(--blue);text-decoration:none;font-weight:700;cursor:pointer;}
 
-.revenue-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.revenue-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);padding:14px;}
-.rev-lbl{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;}
-.rev-val{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--tx);margin-top:4px;}
+.mini-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13px;gap:10px;}
+.mini-row:last-child{border-bottom:none;}
+.mini-row .t{color:var(--text);font-weight:600;}
+.mini-row .s{color:var(--text-faint);font-size:11.5px;font-weight:400;margin-top:1px;}
 
-.viewer-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);overflow:hidden;}
-.viewer-canvas{width:100%;height:190px;display:block;cursor:grab;}
-.viewer-canvas:active{cursor:grabbing;}
-.color-picker-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--bd);background:var(--card2);align-items:center;}
-.color-swatch{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s;}
-.color-swatch:hover,.color-swatch.selected{border-color:#fff;transform:scale(1.2);}
+.empty{color:var(--text-faint);font-size:13px;text-align:center;padding:28px 10px;}
+.empty b{display:block;color:var(--text-dim);margin-bottom:4px;font-size:13.5px;font-weight:700;}
 
-.gauge-card,.ads-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-lg);padding:14px;}
-.gauge-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.gauge-info{flex:1;}
-.gauge-name{font-size:12px;font-weight:600;}
-.gauge-grams{font-family:var(--mono);font-size:10px;color:var(--tx2);}
+.chart-wrap{display:flex;align-items:flex-end;gap:14px;height:140px;margin-top:6px;}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+.chart-bars{display:flex;gap:3px;align-items:flex-end;height:110px;}
+.chart-bar{width:11px;border-radius:3px 3px 0 0;}
+.chart-bar.in{background:var(--blue);}
+.chart-bar.out{background:var(--text-faint);}
+.chart-label{font-size:10px;color:var(--text-faint);font-weight:600;text-transform:uppercase;}
+.chart-legend{display:flex;gap:14px;font-size:11.5px;color:var(--text-dim);margin-top:10px;}
+.chart-legend span{display:inline-flex;align-items:center;gap:5px;}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block;}
 
-.ads-map{background:var(--card2);border-radius:var(--r-sm);height:80px;position:relative;overflow:hidden;margin:10px 0;}
-.ads-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(6,200,216,.15);border:1px dashed var(--teal);}
-.ads-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:var(--teal);}
+/* ---------- TABLE / CARDS ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.toolbar select, .toolbar input[type=text]{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:var(--radius-sm);font-size:13px;}
+.toolbar .grow{flex:1;}
+.search{min-width:200px;}
 
-.data-table{width:100%;border-collapse:collapse;font-size:12px;text-align:left;}
-.data-table th{padding:10px 12px;background:var(--card2);color:var(--tx2);font-weight:600;border-bottom:1px solid var(--bd);}
-.data-table td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);}
-.btn-sm{padding:4px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--card2);color:var(--tx);font-size:11px;cursor:pointer;}
-.btn-sm:hover{border-color:var(--teal);color:var(--teal);}
-.btn-primary{background:var(--teal);color:#07101B;font-weight:700;border:none;padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;}
+.cards{display:flex;flex-direction:column;gap:10px;}
+.card-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:grid;grid-template-columns:1.5fr .8fr 1fr .9fr 1fr auto;gap:14px;align-items:center;}
+.card-row .main-cell .name{font-weight:700;font-size:14px;}
+.card-row .main-cell .sub{color:var(--text-faint);font-size:11.5px;margin-top:3px;}
+.cell-label{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px;font-weight:600;}
+.cell-val{font-size:13px;font-family:var(--font-mono);}
+.row-actions{display:flex;gap:4px;justify-self:end;}
 
-.jarvis-fab{position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#0480A8);border:none;color:#07101B;cursor:pointer;box-shadow:0 4px 20px rgba(6,200,216,.4);z-index:40;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.jarvis-panel{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--bg2);border-left:1px solid var(--bd);display:flex;flex-direction:column;z-index:45;transform:translateX(100%);transition:transform .25s ease;}
-.jarvis-panel.open{transform:translateX(0);}
-.jp-header{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--bd);}
-.jp-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
-.msg-ai,.msg-user{max-width:88%;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.4;}
-.msg-ai{background:var(--card);border:1px solid var(--bd);color:var(--tx);align-self:flex-start;}
-.msg-user{background:rgba(6,200,216,.15);border:1px solid rgba(6,200,216,.3);align-self:flex-end;}
-.jp-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--bd);}
-.jp-input{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:var(--r-sm);padding:8px;color:var(--tx);outline:none;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;}
+.b-pendiente{background:var(--warn-dim);color:var(--warn);}.b-pendiente::before{background:var(--warn);}
+.b-imprimiendo{background:var(--blue-dim);color:#0077B6;}.b-imprimiendo::before{background:#0077B6;}
+.b-listo{background:var(--good-dim);color:var(--good);}.b-listo::before{background:var(--good);}
+.b-enviado{background:var(--purple-dim);color:#5851DB;}.b-enviado::before{background:#5851DB;}
+.b-entregado{background:var(--good-dim);color:var(--good);}.b-entregado::before{background:var(--good);}
+.b-cancelado{background:var(--danger-dim);color:var(--danger);}.b-cancelado::before{background:var(--danger);}
+.b-nuevo{background:var(--warn-dim);color:var(--warn);}.b-nuevo::before{background:var(--warn);}
+.b-conversando{background:var(--blue-dim);color:#0077B6;}.b-conversando::before{background:#0077B6;}
+.b-convertido{background:var(--good-dim);color:var(--good);}.b-convertido::before{background:var(--good);}
+.b-descartado{background:var(--surface-3);color:var(--text-dim);}.b-descartado::before{background:var(--text-faint);}
+.b-atrasado{background:var(--danger);color:#fff;}.b-atrasado::before{display:none;}
+.pay-sinseña{color:var(--text-faint);}
+.pay-seña{color:var(--warn);}
+.pay-completo{color:var(--good);}
 
-.toast{position:fixed;bottom:80px;right:20px;background:var(--card2);border:1px solid var(--bd);color:var(--tx);padding:10px 16px;border-radius:var(--r-sm);font-size:12px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;}
-.toast.show{opacity:1;}
-.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
-.pill-ok{background:rgba(16,185,129,.15);color:var(--green);}
-.pill-warn{background:rgba(245,158,11,.15);color:var(--amber);}
-.pill-err{background:rgba(239,68,68,.15);color:var(--red);}
+/* ---------- FILAMENTO ---------- */
+.fila-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.fila-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;gap:14px;align-items:center;}
+.spool{width:54px;height:54px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;position:relative;}
+.spool::after{content:'';width:58%;height:58%;border-radius:50%;background:var(--surface);position:absolute;}
+.spool .pct{position:relative;z-index:1;font-family:var(--font-mono);font-size:10.5px;font-weight:700;}
+.fila-info{flex:1;min-width:0;}
+.fila-info .name{font-weight:700;font-size:13.5px;}
+.fila-info .meta{color:var(--text-faint);font-size:11.5px;margin-top:2px;}
+.fila-info .grams{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);margin-top:6px;}
+.fila-low{border-color:var(--danger);}
+.fila-humid{border-color:var(--warn);}
+.fila-actions{display:flex;flex-direction:column;gap:5px;}
+.fila-flags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
+.flag{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em;}
+.flag-low{background:var(--danger-dim);color:var(--danger);}
+.flag-humid{background:var(--warn-dim);color:var(--warn);}
+
+/* ---------- MODELOS ---------- */
+.modelo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.modelo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+.modelo-photo{width:100%;height:120px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-faint);}
+.modelo-photo img{width:100%;height:100%;object-fit:cover;}
+.modelo-body{padding:14px 16px;display:flex;flex-direction:column;gap:7px;}
+.modelo-card .name{font-weight:700;font-size:14.5px;}
+.modelo-card .cat{font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.modelo-meta{display:flex;gap:14px;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);margin-top:2px;}
+.modelo-meta div span{display:block;font-size:9.5px;color:var(--text-faint);text-transform:uppercase;font-family:var(--font);font-weight:600;}
+.modelo-card .file{font-size:11.5px;color:var(--text-faint);border-top:1px dashed var(--border);padding-top:8px;margin-top:2px;word-break:break-all;}
+
+/* ---------- CLIENTES ---------- */
+.cliente-grid{display:flex;flex-direction:column;gap:10px;}
+.cliente-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;}
+.cliente-avatar{width:38px;height:38px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;flex:none;font-weight:800;color:#fff;font-size:14px;}
+.cliente-row .name{font-weight:700;font-size:13.5px;}
+.cliente-row .sub{color:var(--text-faint);font-size:11.5px;}
+.cliente-stats{display:flex;gap:18px;margin-left:auto;text-align:right;}
+.cliente-stats div span{display:block;font-size:9.5px;color:var(--text-faint);text-transform:uppercase;font-weight:600;}
+.cliente-stats div b{font-family:var(--font-mono);font-size:13px;font-weight:700;}
+
+/* ---------- PRESUPUESTOS ---------- */
+.calc-wrap{display:grid;grid-template-columns:1fr 340px;gap:18px;}
+.calc-field{margin-bottom:14px;}
+.calc-field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;font-weight:600;}
+.calc-field input,.calc-field select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:var(--radius-sm);}
+.calc-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.calc-result{position:sticky;top:90px;align-self:start;}
+.result-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:13px;}
+.result-line .v{font-family:var(--font-mono);}
+.result-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;margin-top:6px;border-top:1px solid var(--border);}
+.result-total .v{font-family:var(--font-mono);font-size:25px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.result-total .l{font-size:13px;font-weight:700;}
+
+/* ---------- LEADS ---------- */
+.lead-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;gap:14px;align-items:flex-start;}
+.lead-platform{flex:none;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.lead-platform.ig{background:var(--grad);color:#fff;}
+.lead-platform.fb{background:#0866FF;color:#fff;}
+.lead-platform.otro{background:var(--surface-3);color:var(--text-dim);}
+.lead-body{flex:1;min-width:0;}
+.lead-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.lead-top .user{font-weight:700;font-size:13.5px;}
+.lead-msg{color:var(--text-dim);font-size:12.5px;margin-top:5px;line-height:1.5;}
+.lead-meta{display:flex;gap:10px;margin-top:8px;align-items:center;}
+.lead-link{font-size:11.5px;font-weight:700;text-decoration:none;}
+.lead-date{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);}
+
+/* ---------- GASTOS ---------- */
+.gasto-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;display:flex;align-items:center;gap:14px;}
+.gasto-cat{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--surface-3);color:var(--text-dim);flex:none;}
+.gasto-row .nota{flex:1;font-size:13px;color:var(--text-dim);}
+.gasto-row .monto{font-family:var(--font-mono);font-weight:700;font-size:13.5px;}
+
+/* ---------- CONFIG ---------- */
+.config-form{max-width:480px;display:flex;flex-direction:column;gap:14px;}
+.backup-actions{display:flex;gap:10px;margin-top:6px;}
+.info-box{background:var(--blue-dim);border:1px solid #BEE3F8;border-radius:var(--radius-sm);padding:12px 14px;font-size:12.5px;color:#055a8c;line-height:1.55;}
+
+/* ---------- MODAL ---------- */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:15px;margin:0;font-weight:800;}
+.modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:13px;}
+.field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;font-weight:600;}
+.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:var(--radius-sm);}
+.field textarea{resize:vertical;min-height:60px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid var(--border);}
+.field-check{display:flex;align-items:center;gap:8px;}
+.field-check input{width:auto;}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:var(--bg);padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;z-index:60;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;font-weight:600;display:flex;align-items:center;gap:12px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast .undo-btn{background:none;border:none;color:var(--blue);font-weight:700;font-size:13px;padding:0;}
+
+.theme-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:var(--radius-sm);background:var(--surface-2);margin-top:10px;font-size:12.5px;font-weight:600;color:var(--text-dim);}
+.switch{width:34px;height:19px;border-radius:20px;background:var(--surface-3);border:1px solid var(--border);position:relative;flex:none;}
+.switch::after{content:'';width:13px;height:13px;border-radius:50%;background:var(--text-dim);position:absolute;top:2px;left:2px;transition:left .15s,background .15s;}
+body[data-theme="dark"] .switch{background:var(--blue);}
+body[data-theme="dark"] .switch::after{left:17px;background:#fff;}
+
+.app-loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;}
+.app-loading .ring{width:48px;height:48px;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.bottom-nav{display:none;}
+.hidden{display:none !important;}
+
+/* ---------- MODULO 1: FINANZAS/METAS/AMORTIZACION ---------- */
+.goal-wrap{display:flex;flex-direction:column;gap:8px;}
+.goal-top{display:flex;justify-content:space-between;align-items:baseline;}
+.goal-top .amt{font-family:var(--font-mono);font-weight:800;font-size:19px;}
+.goal-top .amt small{font-size:11.5px;color:var(--text-faint);font-weight:600;}
+.goal-bar{height:16px;border-radius:20px;background:var(--surface-3);overflow:hidden;position:relative;}
+.goal-bar-fill{height:100%;background:var(--grad);border-radius:20px;transition:width .6s cubic-bezier(.22,1,.36,1);position:relative;}
+.goal-bar-fill.pulse{animation:goalPulse .9s ease;}
+@keyframes goalPulse{0%{filter:brightness(1);}40%{filter:brightness(1.35);}100%{filter:brightness(1);}}
+.goal-pct{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text-dim);}
+.goal-foot{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.fx-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);}
+.fx-pill{font-family:var(--font-mono);font-weight:700;background:var(--surface-2);padding:3px 9px;border-radius:20px;font-size:12px;}
+.machine-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+.machine-row:last-child{border-bottom:none;}
+.machine-row .m-name{font-weight:700;font-size:13.5px;flex:1;min-width:0;}
+.machine-row .m-sub{font-size:11px;color:var(--text-faint);margin-top:2px;}
+.machine-bar{width:80px;height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden;flex:none;}
+.machine-bar div{height:100%;}
+.mant-ok{background:var(--good);}
+.mant-warn{background:var(--warn);}
+.mant-danger{background:var(--danger);}
+.break-even-wrap{display:flex;flex-direction:column;gap:10px;}
+.be-row{display:flex;align-items:center;gap:10px;}
+.be-label{width:64px;font-size:10.5px;color:var(--text-faint);font-weight:700;text-transform:uppercase;flex:none;}
+.be-track{flex:1;height:22px;background:var(--surface-3);border-radius:6px;overflow:hidden;position:relative;}
+.be-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;}
+.be-fill.ing{background:var(--good);}
+.be-fill.gas{background:var(--danger);}
+.finance-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+@media (max-width:980px){
+  .grid-stats{grid-template-columns:repeat(2,1fr);}
+  .dash-grid{grid-template-columns:1fr;}
+  .card-row{grid-template-columns:1fr;}
+  .fila-grid,.modelo-grid{grid-template-columns:1fr;}
+  .calc-wrap{grid-template-columns:1fr;}
+  .finance-grid{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .content{padding-bottom:90px;}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:40;overflow-x:auto;}
+  .bottom-nav button{flex:1;min-width:64px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;background:none;border:none;color:var(--text-faint);font-size:9.5px;font-weight:600;position:relative;}
+  .bottom-nav button svg{width:19px;height:19px;}
+  .bottom-nav button.active{color:var(--blue);}
+  .bottom-nav .bn-badge{position:absolute;top:5px;right:14px;width:7px;height:7px;border-radius:50%;background:var(--danger);}
+}
 </style>
 </head>
 <body>
 
+<div class="app-loading" id="appLoading"><div class="ring" style="padding:0;background:var(--grad);border-radius:50%;"></div></div>
+
 <div class="app">
-  <aside class="sidebar">
-    <div class="sb-top">
-      <div class="sb-logo">
-        <div class="logo-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5M12 12v9"/></svg>
-        </div>
-        <div><div class="logo-txt">M3DIR STUDIO</div><div class="logo-sub">Los Polvorines, ARG</div></div>
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="ring"><div class="ring-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5M12 12v9"/></svg></div></div>
+        <div><div class="brand-name">M3DIIR</div><div class="brand-sub">Control de taller</div></div>
+      </div>
+      <div class="quicklinks">
+        <a class="qlink ig" href="https://instagram.com/direct/inbox" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/></svg>IG DM</a>
+        <a class="qlink fb" href="https://www.facebook.com/messages" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 1 1-3.8-7"/><path d="M21 4l-9.5 9.5-3-3"/></svg>FB Msgs</a>
+        <a class="qlink mk" href="https://www.facebook.com/marketplace/you/selling" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18l-1.5 11a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Market</a>
       </div>
     </div>
-    <div class="sb-nav">
-      <div class="nav-lbl">Menú Principal</div>
-      <button class="nav-item active" data-sec="dashboard" onclick="goTo('dashboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-        Dashboard
-      </button>
-      <button class="nav-item" data-sec="impresoras" onclick="goTo('impresoras')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="9" rx="2"/><path d="M4 14v5h16v-5"/><path d="M8 17h8"/></svg>
-        Impresoras
-      </button>
-      <button class="nav-item" data-sec="stl" onclick="goTo('stl')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-        Archivos STL
-      </button>
-      <button class="nav-item" data-sec="pedidos" onclick="goTo('pedidos')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
-        Pedidos Locales
-        <span class="nav-badge" id="badge-pedidos">0</span>
-      </button>
-      <div class="nav-lbl">Stock Filamentos</div>
-      <div id="fila-dots"></div>
-      <div class="nav-lbl">Sistema</div>
-      <button class="nav-item" data-sec="config" onclick="goTo('config')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
-        Configuración
-      </button>
-    </div>
-  </aside>
+    <div class="nav" id="nav"></div>
+    <div class="nav-spacer"></div>
+    <div class="theme-toggle"><span id="themeLabel">Modo oscuro</span><button class="switch" onclick="toggleTheme()" aria-label="Cambiar tema" style="cursor:pointer"></button></div>
+    <div class="nav-foot">Datos guardados solo en este navegador. Hacé un backup desde Configuración de vez en cuando.</div>
+  </div>
 
   <div class="main">
     <div class="topbar">
-      <div class="tb-title" id="tb-title">DASHBOARD</div>
-      <div class="tb-grow"></div>
-      <div class="tb-search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-        <input placeholder="Buscar cliente, modelo, estado..." id="global-search" oninput="handleSearch(this.value)">
-      </div>
-      <button class="undo-btn" id="undo-btn" onclick="undoAction()" disabled>Deshacer</button>
-      <button class="tb-btn" onclick="toggleTheme()" title="Modo Claro/Oscuro">☀️</button>
-      <div class="tb-avatar">M</div>
+      <div><h1 id="pageTitle">Resumen</h1><div class="sub" id="pageSub">Tu taller, de un vistazo</div></div>
+      <div class="topbar-actions" id="topbarActions"></div>
     </div>
-
-    <div class="content-area" id="content-area"></div>
+    <div class="content" id="content"></div>
+    <div class="bottom-nav" id="bottomNav"></div>
   </div>
 </div>
 
-<button class="jarvis-fab" onclick="toggleJarvis()" title="Abrir J.A.R.V.I.S.">🤖</button>
-<div class="jarvis-panel" id="jarvis-panel">
-  <div class="jp-header">
-    <strong style="color:var(--teal)">J.A.R.V.I.S. OS</strong>
-    <span style="font-size:10px;color:var(--tx2);margin-left:auto">v2.7 Fixed Auth</span>
-    <button onclick="toggleJarvis()" style="background:none;border:none;color:var(--tx2);cursor:pointer">✕</button>
-  </div>
-  <div class="jp-msgs" id="jp-msgs">
-    <div class="msg-ai">Hola, Facundo. Soy J.A.R.V.I.S. Estoy conectado al panel y listo. ¿Qué necesitás revisar o cambiar hoy?</div>
-  </div>
-  <div class="jp-input-row">
-    <input class="jp-input" id="jp-input" placeholder="Escribí una orden o consulta..." onkeydown="if(event.key==='Enter')sendToJarvis()">
-    <button class="btn-primary" onclick="sendToJarvis()">Enviar</button>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Nuevo</h3><button class="btn btn-ghost btn-sm" onclick="closeModalConfirm()">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModalConfirm()">Salir sin guardar</button><button class="btn btn-primary" id="modalSaveBtn">Guardar</button></div>
   </div>
 </div>
 
-<div class="toast" id="toast">Notificación</div>
+<div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   CONFIGURACIÓN DE API KEY Y ESTADO DEL TALLER
-═══════════════════════════════════════════════════════════════ */
-
-// 🔑 CLAVE DE API OFICIAL
-const GEMINI_API_KEY = "AQ.Ab8RN6KCoM3nf06Gm7ATWuq-I6k4su3knxYr4lNAWuNrjpA9Iw";
-
-const DB = {
-  activeView: 'dashboard',
-  searchQuery: '',
-  impresoras: [
-    { id: 'imp1', nombre: 'Impresora 1', modelo: 'Bambu Lab A1', activa: true, temp: 218, progreso: 68, trabajo: 'Portasahumerios Espartano' },
-    { id: 'imp2', nombre: 'Impresora 2', modelo: 'Bambu Lab A3', activa: false, temp: 24, progreso: 0, trabajo: 'En espera' }
-  ],
-  filamentos: [
-    { id: 'f1', tipo: 'PLA', color: 'Mármol', colorHex: '#D0C8B8', pesoTotal: 1000, pesoRestante: 850 },
-    { id: 'f2', tipo: 'PLA', color: 'Blanco Mate', colorHex: '#F5F5F5', pesoTotal: 1000, pesoRestante: 220 },
-    { id: 'f3', tipo: 'PLA', color: 'Negro', colorHex: '#1A1A1A', pesoTotal: 1000, pesoRestante: 1000 }
-  ],
-  pedidos: [
-    { id: 'p1', cliente: 'Lucas Gomez', modelo: 'Portasahumerios Espartano', precio: 14500, estado: 'Imprimiendo', fecha: '2026-08-03' },
-    { id: 'p2', cliente: 'Estudio Arq Devoto', modelo: 'Maqueta Volumétrica 1:100', precio: 48000, estado: 'Pendiente', fecha: '2026-08-04' }
-  ],
-  modelosSTL: [
-    { id: 'm1', nombre: 'Portasahumerios Espartano.stl', pesoG: 110, tiempoMin: 140 },
-    { id: 'm2', nombre: 'Organizador Escritorio.stl', pesoG: 85, tiempoMin: 90 }
-  ],
-  config: { moneda: '$', precioKwh: 140, consumoW: 120 }
+/* ============ ICONS ============ */
+const ICONS = {
+  dashboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  pedidos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  clientes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="2.8"/><path d="M16 14.3c2.8.4 5 2.6 5 5.7"/></svg>',
+  filamento:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>',
+  presupuestos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>',
+  modelos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5M12 12v9"/></svg>',
+  leads:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4l-9 9-3-3"/></svg>',
+  gastos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  finanzas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><circle cx="19" cy="6" r="1.6"/></svg>',
+  config:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 5v14M5 12h14"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>',
+  convert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.6-1.3 1.2-1.9 1.3-.5.1-1.1.1-1.7-.1-.4-.1-1-.3-1.6-.6-2.8-1.2-4.6-4-4.8-4.2-.1-.2-1.2-1.6-1.2-3 0-1.4.7-2.1 1-2.4.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.7.7 1.9.1.2.1.4 0 .5-.1.2-.2.3-.3.5-.2.2-.4.4-.2.7.2.4 1 1.5 2.1 2.4 1.4 1.2 2.5 1.6 2.9 1.8.3.1.5.1.7-.1.2-.3.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.8.8.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0 4 4m-4-4-4 4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
 };
 
-let HISTORY = [];
-function snapshot() {
-  HISTORY.push(JSON.stringify({ impresoras: DB.impresoras, filamentos: DB.filamentos, pedidos: DB.pedidos, modelosSTL: DB.modelosSTL }));
-  if (HISTORY.length > 20) HISTORY.shift();
-  document.getElementById('undo-btn').disabled = false;
-}
+/* ============ STORAGE ============ */
+const KEYS = {pedidos:'pedidos:list', filamentos:'filamentos:list', modelos:'modelos:list', leads:'leads:list', presupuestos:'presupuestos:list', gastos:'gastos:list', maquinas:'maquinas:list', finanzas:'finanzas:data', config:'config:data'};
+let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gastos:[], maquinas:[], finanzas:{ retirosFondo:[], dolar:null },
+  config:{nombreNegocio:'M3diir', instagram:'@m3diir', whatsapp:'', moneda:'$',
+  precioKwh:140, consumoW:120, vidaUtilHoras:4320, costoRepuestos:150000, margenErrorPct:5, margenGanancia:4, markupInsumosPct:30, markupMLPct:20,
+  metaObjetivo:1300000, metaNombre:'Bambu Lab A1 Combo', mermaPct:8, alertaGramos:150, alertaHumedadDias:90} };
 
-function undoAction() {
-  if (!HISTORY.length) return;
-  const prev = JSON.parse(HISTORY.pop());
-  DB.impresoras = prev.impresoras;
-  DB.filamentos = prev.filamentos;
-  DB.pedidos = prev.pedidos;
-  DB.modelosSTL = prev.modelosSTL;
-  renderCurrentView();
-  if (!HISTORY.length) document.getElementById('undo-btn').disabled = true;
-  showToast('Cambio deshecho con éxito');
-}
+const MAQUINAS_DEFAULT = [
+  {id:'ender3v3', nombre:'Ender 3 V3 Plus', horasUso:0, alertaCada:100, ultimaAlertaHoras:0},
+  {id:'bambua1', nombre:'Bambu Lab A1', horasUso:0, alertaCada:300, ultimaAlertaHoras:0}
+];
 
-function showToast(msg) {
+let storageOk = true;
+try { localStorage.getItem('test'); } catch(e) { storageOk = false; }
+
+window.storage = {
+  async get(k){ if(!storageOk) return null; const v = localStorage.getItem(k); return v ? {key:k, value:v} : null; },
+  async set(k,v){ if(storageOk) localStorage.setItem(k, v); return {key:k,value:v}; },
+  async delete(k){ if(storageOk) localStorage.removeItem(k); return {key:k,deleted:true}; },
+  async list(){ return {keys: storageOk ? Object.keys(localStorage) : []}; }
+};
+
+async function loadAll(){
+  for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){
+    try{ const r = await window.storage.get(KEYS[k]); DB[k] = r ? JSON.parse(r.value) : []; }catch(e){ DB[k] = []; }
+  }
+  if(!DB.maquinas || !DB.maquinas.length) DB.maquinas = MAQUINAS_DEFAULT.map(m=>({...m}));
+  try{ const r = await window.storage.get(KEYS.config); if(r) DB.config = {...DB.config, ...JSON.parse(r.value)}; }catch(e){}
+  try{ const r = await window.storage.get(KEYS.finanzas); if(r) DB.finanzas = {...DB.finanzas, ...JSON.parse(r.value)}; }catch(e){}
+}
+async function save(key){
+  try{ const ok = await window.storage.set(KEYS[key], JSON.stringify(DB[key])); if(!ok && storageOk===false) toast('No se pudo guardar. Modo local.'); }catch(e){ toast('No se pudo guardar. Reintentá.'); }
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function toast(msg, actionLabel, actionFn){
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  t.innerHTML = `<span>${msg}</span>` + (actionLabel? `<button class="undo-btn" id="toastAction">${actionLabel}</button>` : '');
+  if(actionLabel){ document.getElementById('toastAction').onclick = ()=>{ actionFn(); t.classList.remove('show'); clearTimeout(window._toastTimer); }; }
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), actionLabel? 4500 : 2200);
+}
+function money(n){ const c = DB.config.moneda || '$'; return c + (Number(n||0)).toLocaleString('es-AR',{maximumFractionDigits:0}); }
+function fmtDate(d){ if(!d) return '—'; const dt = new Date(d+'T00:00:00'); return dt.toLocaleDateString('es-AR',{day:'2-digit',month:'short'}); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function daysSince(d){ if(!d) return null; const then = new Date(d+'T00:00:00'); const now = new Date(todayStr()+'T00:00:00'); return Math.round((now-then)/86400000); }
+function esc(s){ return (s===undefined||s===null) ? '' : String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function waDigits(s){ if(!s) return ''; const d = String(s).replace(/[^0-9]/g,''); return d.length>=8 ? d : ''; }
+
+/* ============ MODULO 1: FONDO DE AHORRO (BAMBU-OMETRO) ============ */
+// El fondo se calcula como: total efectivamente cobrado en pedidos (anticipos + pagos completos)
+// menos gastos del taller, menos retiros manuales del fondo. Así el Bambu-Ómetro refleja ahorro neto real.
+function cobradoPedido(p){
+  if(p.estado==='Cancelado') return 0;
+  const total = Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0);
+  if(p.estadoPago==='Pagado completo') return total;
+  if(p.estadoPago==='Seña pagada') return Number(p.anticipo||0);
+  return 0;
+}
+function totalCobrado(){ return DB.pedidos.reduce((s,p)=>s+cobradoPedido(p),0); }
+function totalGastos(){ return DB.gastos.reduce((s,g)=>s+Number(g.monto||0),0); }
+function totalRetiros(){ return (DB.finanzas.retirosFondo||[]).reduce((s,r)=>s+Number(r.monto||0),0); }
+function fondoAhorro(){ return Math.max(0, totalCobrado() - totalGastos() - totalRetiros()); }
+let _lastFondoPct = null;
+async function registrarCobro(pedidoId, montoAnterior){
+  // Se llama al guardar un pedido; si el cobro subió, dispara animación en el dashboard.
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   THREE.JS REAL STL VIEWER
-═══════════════════════════════════════════════════════════════ */
-let threeCtx = null;
-
-function initThree() {
-  const canvas = document.getElementById('three-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-  
-  const w = canvas.clientWidth || 260, h = canvas.clientHeight || 190;
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(document.documentElement.getAttribute('data-theme') === 'light' ? 0xF5F8FC : 0x0D1E2D);
-
-  const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-  camera.position.set(0, 2, 5);
-
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(w, h);
-
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-
-  const amb = new THREE.AmbientLight(0xffffff, 0.7);
-  scene.add(amb);
-  const dir = new THREE.DirectionalLight(0x06C8D8, 0.8);
-  dir.position.set(5, 10, 7);
-  scene.add(dir);
-
-  const grid = new THREE.GridHelper(6, 12, 0x162540, 0x162540);
-  scene.add(grid);
-
-  const geo = new THREE.TorusKnotGeometry(0.8, 0.25, 100, 16);
-  const mat = new THREE.MeshStandardMaterial({ color: 0xD0C8B8, metalness: 0.2, roughness: 0.4 });
-  const mesh = new THREE.Mesh(geo, mat);
-  scene.add(mesh);
-
-  function animate() {
-    requestAnimationFrame(animate);
-    mesh.rotation.y += 0.005;
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  threeCtx = { scene, camera, renderer, controls, mesh, mat };
-}
-
-function setViewerColor(hex) {
-  if (threeCtx && threeCtx.mat) {
-    threeCtx.mat.color.set(hex);
-    showToast(`Color cambiado: ${hex}`);
+/* ============ MODULO 1: COTIZACION DOLAR ============ */
+async function actualizarDolar(){
+  const el = document.getElementById('fxPill');
+  if(el) el.textContent = 'Consultando...';
+  try{
+    const resp = await fetch('https://dolarapi.com/v1/dolares/blue');
+    const data = await resp.json();
+    DB.finanzas.dolar = {compra:data.compra, venta:data.venta, fecha: new Date().toISOString()};
+    await save('finanzas');
+    renderPage();
+    toast('Cotización del dólar actualizada');
+  }catch(e){
+    toast('No se pudo consultar el dólar (revisá tu conexión)');
+    if(el) el.textContent = DB.finanzas.dolar ? money(DB.finanzas.dolar.venta)+' (ant.)' : 'Sin datos';
   }
 }
 
-function loadSTL(input) {
-  const file = input.files[0];
-  if (!file || !threeCtx) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const loader = new THREE.STLLoader();
-      const geo = loader.parse(e.target.result);
-      geo.center();
-
-      threeCtx.scene.remove(threeCtx.mesh);
-      
-      geo.computeBoundingBox();
-      const sz = geo.boundingBox.getSize(new THREE.Vector3());
-      const maxDim = Math.max(sz.x, sz.y, sz.z);
-      const scale = 2.5 / (maxDim || 1);
-
-      const mesh = new THREE.Mesh(geo, threeCtx.mat);
-      mesh.scale.setScalar(scale);
-      mesh.rotation.x = -Math.PI / 2;
-
-      threeCtx.scene.add(mesh);
-      threeCtx.mesh = mesh;
-      showToast(`Cargado STL: ${file.name}`);
-    } catch (err) {
-      showToast('Error procesando archivo STL');
-    }
-  };
-  reader.readAsArrayBuffer(file);
+/* ============ MODULO 1: MAQUINAS / AMORTIZACION ============ */
+function estadoMantenimiento(m){
+  const desdeUltimo = m.horasUso - (m.ultimaAlertaHoras||0);
+  if(desdeUltimo >= m.alertaCada) return 'danger';
+  if(desdeUltimo >= m.alertaCada*0.8) return 'warn';
+  return 'ok';
+}
+async function sumarHorasMaquina(id, horas){
+  const m = DB.maquinas.find(x=>x.id===id); if(!m) return;
+  m.horasUso = Math.round((Number(m.horasUso||0) + Number(horas||0))*100)/100;
+  await save('maquinas'); renderPage();
+}
+async function marcarMantenimiento(id){
+  const m = DB.maquinas.find(x=>x.id===id); if(!m) return;
+  m.ultimaAlertaHoras = m.horasUso;
+  await save('maquinas'); renderPage();
+  toast('Mantenimiento registrado, contador reiniciado');
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ROUTING & VISTAS
-═══════════════════════════════════════════════════════════════ */
-function goTo(sec) {
-  DB.activeView = sec;
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.sec === sec);
-  });
-  document.getElementById('tb-title').textContent = sec.toUpperCase();
-  renderCurrentView();
-}
-
-function renderCurrentView() {
-  const container = document.getElementById('content-area');
-  renderFilaDots();
-
-  if (DB.activeView === 'dashboard') {
-    const revTotal = DB.pedidos.filter(p => p.estado !== 'Cancelado').reduce((sum, p) => sum + p.precio, 0);
-    const activos = DB.pedidos.filter(p => p.estado !== 'Entregado' && p.estado !== 'Cancelado').length;
-    document.getElementById('badge-pedidos').textContent = activos;
-
-    container.innerHTML = `
-      <div class="dashboard-grid">
-        <div class="center-col">
-          <div class="sec-head"><div class="sec-title"><span class="dot"></span>Live Production Tracking</div></div>
-          <div class="printer-grid">
-            ${DB.impresoras.map(imp => `
-              <div class="printer-card ${imp.activa ? 'active-printer' : ''}">
-                <div class="pc-header">
-                  <div>
-                    <div class="pc-title">${imp.nombre}</div>
-                    <div class="pc-sub">${imp.modelo}</div>
-                  </div>
-                  <button class="pc-toggle ${imp.activa ? 'on' : 'off'}" onclick="togglePrinter('${imp.id}')"></button>
-                </div>
-                <div class="printer-preview">
-                  ${imp.activa ? '<span class="live-badge"><span class="live-dot"></span>LIVE</span>' : '<span style="color:var(--tx2);font-size:11px">Inactiva</span>'}
-                </div>
-                <div class="printer-temp-zone">
-                  <div style="font-size:10px;color:var(--tx2)">TEMPERATURA</div>
-                  <div class="temp-val">${imp.activa ? imp.temp + '°C' : 'OFF'}</div>
-                  <div style="font-size:11px;color:var(--tx);margin-top:4px">${imp.trabajo}</div>
-                </div>
-                <div class="progress-row">
-                  <div class="progress-bar"><div class="progress-fill" style="width:${imp.progreso}%"></div></div>
-                  <span style="font-family:var(--mono);font-size:11px">${imp.progreso}%</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
-            <div class="revenue-card">
-              <div class="rev-lbl">Revenue Total</div>
-              <div class="rev-val">$${revTotal.toLocaleString('es-AR')}</div>
-              <div style="margin-top:10px;font-size:11px;color:var(--teal)">Activos: ${activos} pedidos</div>
-            </div>
-
-            <div class="viewer-card">
-              <canvas class="viewer-canvas" id="three-canvas"></canvas>
-              <div class="color-picker-row">
-                ${DB.filamentos.map(f => `<div class="color-swatch" style="background:${f.colorHex}" onclick="setViewerColor('${f.colorHex}')" title="${f.color}"></div>`).join('')}
-                <label style="margin-left:auto;font-size:11px;color:var(--teal);cursor:pointer;font-weight:600">
-                  📁 Subir STL
-                  <input type="file" accept=".stl" style="display:none" onchange="loadSTL(this)">
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="right-col">
-          <div class="gauge-card">
-            <div class="sec-title" style="margin-bottom:12px">Stock Filamento Visual</div>
-            ${DB.filamentos.map(f => {
-              const pct = Math.round((f.pesoRestante / f.pesoTotal) * 100);
-              return `
-                <div class="gauge-row">
-                  <div class="gauge-info">
-                    <div class="gauge-name">${f.tipo} ${f.color}</div>
-                    <div class="gauge-grams">${f.pesoRestante}g / ${f.pesoTotal}g (${pct}%)</div>
-                  </div>
-                  <span class="pill ${pct < 25 ? 'pill-warn' : 'pill-ok'}">${pct}%</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <div class="ads-card">
-            <div class="sec-title">Meta Ads Local (3 km)</div>
-            <div class="ads-map"><div class="ads-circle"></div><div class="ads-pin"></div></div>
-            <div style="font-size:11px;color:var(--tx2);display:flex;justify-content:space-between">
-              <span>Mensajes recibidos hoy:</span>
-              <strong style="color:var(--tx)">8 consultas</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    setTimeout(initThree, 50);
-
-  } else if (DB.activeView === 'impresoras') {
-    container.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h2>Gestión de Granja de Impresoras</h2>
-        <button class="btn-primary" onclick="agregarImpresora()">+ Nueva Impresora</button>
-      </div>
-      <table class="data-table">
-        <thead>
-          <tr><th>Nombre</th><th>Modelo</th><th>Estado</th><th>Trabajo Actual</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-          ${DB.impresoras.map(imp => `
-            <tr>
-              <td><strong>${imp.nombre}</strong></td>
-              <td>${imp.modelo}</td>
-              <td><span class="pill ${imp.activa ? 'pill-ok' : 'pill-err'}">${imp.activa ? 'En Línea' : 'Inactiva'}</span></td>
-              <td>${imp.trabajo}</td>
-              <td>
-                <button class="btn-sm" onclick="togglePrinter('${imp.id}')">${imp.activa ? 'Apagar' : 'Encender'}</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-
-  } else if (DB.activeView === 'pedidos') {
-    const q = DB.searchQuery.toLowerCase();
-    const filtrados = DB.pedidos.filter(p => p.cliente.toLowerCase().includes(q) || p.modelo.toLowerCase().includes(q));
-
-    container.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h2>Pedidos Locales (San Miguel / Los Polvorines)</h2>
-        <button class="btn-primary" onclick="crearPedidoPrompt()">+ Nuevo Pedido</button>
-      </div>
-      <table class="data-table">
-        <thead>
-          <tr><th>Cliente</th><th>Modelo</th><th>Precio</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-          ${filtrados.map(p => `
-            <tr>
-              <td><strong>${p.cliente}</strong></td>
-              <td>${p.modelo}</td>
-              <td>$${p.precio.toLocaleString('es-AR')}</td>
-              <td><span class="pill ${p.estado === 'Entregado' ? 'pill-ok' : p.estado === 'Imprimiendo' ? 'pill-warn' : 'pill-err'}">${p.estado}</span></td>
-              <td>${p.fecha}</td>
-              <td>
-                <button class="btn-sm" onclick="cambiarEstadoPedido('${p.id}', 'Entregado')">Entregado</button>
-                <button class="btn-sm" onclick="cancelarPedido('${p.id}')">Cancelar</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-
-  } else if (DB.activeView === 'stl') {
-    container.innerHTML = `
-      <h2>Catálogo de Archivos STL Guardados</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:14px;margin-top:16px">
-        ${DB.modelosSTL.map(m => `
-          <div class="revenue-card">
-            <div style="font-size:24px;margin-bottom:8px">📐</div>
-            <strong style="display:block;font-size:12px">${m.nombre}</strong>
-            <div style="font-size:11px;color:var(--tx2);margin-top:6px">Peso est.: ${m.pesoG}g | Tiempo: ${m.tiempoMin}m</div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-  } else if (DB.activeView === 'config') {
-    container.innerHTML = `
-      <h2>Configuración del Taller y Costos</h2>
-      <div style="max-width:400px;margin-top:16px;display:flex;flex-direction:column;gap:12px">
-        <label>Precio por kWh (ARS):
-          <input class="jp-input" style="width:100%;margin-top:4px" value="${DB.config.precioKwh}" onchange="DB.config.precioKwh=Number(this.value);showToast('Configuración guardada')">
-        </label>
-        <label>Consumo Promedio Impresora (Watts):
-          <input class="jp-input" style="width:100%;margin-top:4px" value="${DB.config.consumoW}" onchange="DB.config.consumoW=Number(this.value);showToast('Configuración guardada')">
-        </label>
-      </div>
-    `;
+/* ============ NAV ============ */
+const SECTIONS = [
+  {id:'dashboard', label:'Resumen', icon:'dashboard'},
+  {id:'pedidos', label:'Pedidos', icon:'pedidos'},
+  {id:'clientes', label:'Clientes', icon:'clientes'},
+  {id:'filamentos', label:'Filamento', icon:'filamento'},
+  {id:'presupuestos', label:'Presupuestos', icon:'presupuestos'},
+  {id:'modelos', label:'Modelos', icon:'modelos'},
+  {id:'leads', label:'Redes (IG/FB)', icon:'leads'},
+  {id:'gastos', label:'Gastos', icon:'gastos'},
+  {id:'finanzas', label:'Finanzas y Metas', icon:'finanzas'},
+  {id:'config', label:'Configuración', icon:'config'},
+];
+let current = 'dashboard';
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = SECTIONS.map(s=>{
+    let badge='';
+    if(s.id==='pedidos'){ const n=DB.pedidos.filter(p=>!['Entregado','Cancelado'].includes(p.estado)).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='filamentos'){ const n=DB.filamentos.filter(f=>lowStock(f)||humedadRiesgo(f)).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='leads'){ const n=DB.leads.filter(l=>!l.respondido).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='finanzas'){ const n=DB.maquinas.filter(m=>estadoMantenimiento(m)==='danger').length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    return `<button class="nav-item ${s.id===current?'active':''}" onclick="goTo('${s.id}')">${ICONS[s.icon]}<span>${s.label}</span>${badge}</button>`;
+  }).join('');
+  const bnSections = ['dashboard','pedidos','clientes','leads','config'];
+  const bn = document.getElementById('bottomNav');
+  if(bn){
+    bn.innerHTML = bnSections.map(id=>{
+      const s = SECTIONS.find(x=>x.id===id);
+      let dot='';
+      if(id==='pedidos' && DB.pedidos.some(p=>!['Entregado','Cancelado'].includes(p.estado))) dot='<span class="bn-badge"></span>';
+      if(id==='leads' && DB.leads.some(l=>!l.respondido)) dot='<span class="bn-badge"></span>';
+      return `<button class="${id===current?'active':''}" onclick="goTo('${id}')">${ICONS[s.icon]}${dot}<span>${s.label.split(' ')[0]}</span></button>`;
+    }).join('');
   }
 }
+function lowStock(f){ if(!f.pesoTotal) return false; const pctBajo = (f.pesoRestante/f.pesoTotal) <= 0.15; const gramosBajo = f.pesoRestante <= (DB.config.alertaGramos||150); return pctBajo || gramosBajo; }
+function humedadRiesgo(f){ const d = daysSince(f.fechaApertura); return d!==null && d >= (DB.config.alertaHumedadDias||90); }
+function isAtrasado(p){ return p.fechaEntrega && p.fechaEntrega < todayStr() && !['Entregado','Cancelado'].includes(p.estado); }
+function goTo(id, opts){ current = id; renderNav(); renderPage(opts); }
 
-function renderFilaDots() {
-  const wrap = document.getElementById('fila-dots');
-  if (wrap) {
-    wrap.innerHTML = DB.filamentos.map(f => `
-      <div class="fila-dot-row">
-        <div class="fila-dot" style="background:${f.colorHex}"></div>
-        <span>${f.tipo} ${f.color} (${f.pesoRestante}g)</span>
-      </div>
-    `).join('');
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ACCIONES DE MUTACIÓN
-═══════════════════════════════════════════════════════════════ */
-function togglePrinter(id) {
-  snapshot();
-  const imp = DB.impresoras.find(x => x.id === id);
-  if (imp) {
-    imp.activa = !imp.activa;
-    showToast(`${imp.nombre} ${imp.activa ? 'encendida' : 'apagada'}`);
-    renderCurrentView();
-  }
-}
-
-function cambiarEstadoPedido(id, estado) {
-  snapshot();
-  const p = DB.pedidos.find(x => x.id === id);
-  if (p) {
-    p.estado = estado;
-    showToast(`Pedido de ${p.cliente} marcado como ${estado}`);
-    renderCurrentView();
-  }
-}
-
-function cancelarPedido(id) {
-  snapshot();
-  const p = DB.pedidos.find(x => x.id === id);
-  if (p) {
-    p.estado = 'Cancelado';
-    showToast(`Pedido cancelado`);
-    renderCurrentView();
-  }
-}
-
-function crearPedidoPrompt() {
-  const cliente = prompt('Nombre del Cliente:');
-  if (!cliente) return;
-  const modelo = prompt('Modelo STL:') || 'Objeto 3D';
-  const precio = Number(prompt('Precio ARS:')) || 10000;
-
-  snapshot();
-  DB.pedidos.unshift({
-    id: 'p' + Date.now(),
-    cliente,
-    modelo,
-    precio,
-    estado: 'Pendiente',
-    fecha: new Date().toISOString().slice(0, 10)
-  });
-  showToast('Pedido registrado con éxito');
-  renderCurrentView();
-}
-
-function agregarImpresora() {
-  const nombre = prompt('Nombre de la máquina:') || 'Impresora Nueva';
-  snapshot();
-  DB.impresoras.push({
-    id: 'imp' + Date.now(),
-    nombre,
-    modelo: 'Bambu Lab A1',
-    activa: false,
-    temp: 20,
-    progreso: 0,
-    trabajo: 'Libre'
-  });
-  renderCurrentView();
-}
-
-function handleSearch(val) {
-  DB.searchQuery = val;
-  if (DB.activeView === 'pedidos') renderCurrentView();
-}
-
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  if (threeCtx) {
-    threeCtx.scene.background.set(next === 'light' ? 0xF5F8FC : 0x0D1E2D);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   J.A.R.V.I.S. + GEMINI REST API CON AUTH HEADERS CORREGIDOS
-═══════════════════════════════════════════════════════════════ */
-
-function toggleJarvis() {
-  document.getElementById('jarvis-panel').classList.toggle('open');
-}
-
-let geminiChatHistory = [];
-
-async function sendToJarvis() {
-  const input = document.getElementById('jp-input');
-  const txt = input.value.trim();
-  if (!txt) return;
-
-  const msgs = document.getElementById('jp-msgs');
-  msgs.innerHTML += `<div class="msg-user">${txt}</div>`;
-  input.value = '';
-
-  const loading = document.createElement('div');
-  loading.className = 'msg-ai';
-  loading.style.opacity = '0.6';
-  loading.textContent = 'J.A.R.V.I.S. procesando...';
-  msgs.appendChild(loading);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  const contextPrompt = `Sos J.A.R.V.I.S., el asistente virtual inteligente del taller de impresión 3D M3DIR Studio.
-Hablás en español rioplatense, sos directo, eficiente e ingenioso.
-
-Estado actual del taller:
-- Impresoras: ${JSON.stringify(DB.impresoras)}
-- Filamentos: ${JSON.stringify(DB.filamentos)}
-- Pedidos: ${JSON.stringify(DB.pedidos)}`;
-
-  const requestBody = {
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: contextPrompt + "\n\nConsulta: " + txt }]
-      }
+/* ============ MODAL ENGINE ============ */
+const SCHEMAS = {
+  pedido: { title:(e)=> e? 'Editar pedido' : 'Nuevo pedido', fields: [
+      {key:'cliente', label:'Cliente', type:'text', required:true, placeholder:'Nombre del cliente', row:'a'},
+      {key:'contacto', label:'Contacto (tel / @usuario)', type:'text', placeholder:'WhatsApp o Instagram', row:'a'},
+      {key:'origen', label:'Origen', type:'select', options:['Instagram','Facebook Marketplace','WhatsApp','Otro'], default:'Instagram', row:'b'},
+      {key:'estado', label:'Estado', type:'select', options:['Pendiente','Imprimiendo','Listo','Enviado','Entregado','Cancelado'], default:'Pendiente', row:'b'},
+      {key:'modelo', label:'Modelo / pieza', type:'text', placeholder:'Ej: Maceta hexagonal', row:'c'},
+      {key:'color', label:'Color', type:'text', placeholder:'Ej: Negro mate', row:'c'},
+      {key:'cantidad', label:'Cantidad', type:'number', default:1, row:'d'},
+      {key:'precio', label:'Precio (solo piezas)', type:'number', default:0, row:'d'},
+      {key:'filamentoId', label:'Filamento usado (para descuento de stock)', type:'select', options:[], row:'k'},
+      {key:'gramosUsados', label:'Gramos a usar (sin merma)', type:'number', default:0, row:'k'},
+      {key:'envio', label:'Tipo de Envío', type:'select', options:['Sin envío (retira)','A coordinar','Con envío (costo aparte)'], default:'Sin envío (retira)', row:'e'},
+      {key:'costoEnvio', label:'Costo de envío', type:'number', default:0, row:'e'},
+      {key:'costoEmbalaje', label:'Costo de embalaje (bolsas, cajas, etc.)', type:'number', default:0, row:'f'},
+      {key:'anticipo', label:'Seña / anticipo pagado', type:'number', default:0, row:'f'},
+      {key:'estadoPago', label:'Estado de pago', type:'select', options:['Sin seña','Seña pagada','Pagado completo'], default:'Sin seña', row:'g'},
+      {key:'fecha', label:'Fecha del pedido', type:'date', default:()=>todayStr(), row:'g'},
+      {key:'fechaEntrega', label:'Fecha de entrega prometida', type:'date', row:'h'},
+      {key:'direccion', label:'Dirección / punto de entrega', type:'text', row:'h'},
+      {key:'notas', label:'Notas', type:'textarea', row:'i'},
     ]
+  },
+  filamento: { title:(e)=> e? 'Editar filamento' : 'Nuevo carrete', fields: [
+      {key:'marca', label:'Marca', type:'text', placeholder:'Ej: Filaverse', row:'a'},
+      {key:'tipo', label:'Tipo', type:'select', options:['PLA','PETG','ABS','TPU','Resina','Nylon','Otro'], default:'PLA', row:'a'},
+      {key:'color', label:'Color', type:'text', placeholder:'Ej: Naranja', row:'b'},
+      {key:'colorHex', label:'Tono', type:'color', default:'#0095F6', row:'b'},
+      {key:'pesoTotal', label:'Peso total (g)', type:'number', default:1000, row:'c'},
+      {key:'pesoRestante', label:'Peso restante (g)', type:'number', default:1000, row:'c'},
+      {key:'precioKg', label:'Precio por kg', type:'number', default:0, row:'d'},
+      {key:'tempOptima', label:'Temp. óptima de uso (°C)', type:'number', default:210, row:'d'},
+      {key:'fechaApertura', label:'Fecha de apertura del rollo', type:'date', default:()=>todayStr()},
+    ]
+  },
+  modelo: { title:(e)=> e? 'Editar modelo' : 'Nuevo modelo', fields: [
+      {key:'nombre', label:'Nombre', type:'text', required:true},
+      {key:'categoria', label:'Categoría', type:'text', placeholder:'Ej: Decoración, Funcional...', row:'a'},
+      {key:'tiempoHoras', label:'Tiempo estimado (hs)', type:'number', row:'a'},
+      {key:'gramos', label:'Gramos estimados', type:'number', row:'b'},
+      {key:'precioSugerido', label:'Precio sugerido', type:'number', row:'b'},
+      {key:'foto', label:'Foto (link a imagen)', type:'text', placeholder:'https://...'},
+      {key:'archivo', label:'Archivo (nombre o link)', type:'text', placeholder:'Ej: maceta_v2.stl o link a Drive'},
+      {key:'notas', label:'Notas', type:'textarea'},
+    ]
+  },
+  lead: { title:(e)=> e? 'Editar contacto' : 'Nuevo contacto', fields:[
+      {key:'plataforma', label:'Plataforma', type:'select', options:['Instagram','Facebook Marketplace','Otro'], default:'Instagram', row:'a'},
+      {key:'fecha', label:'Fecha', type:'date', default:()=>todayStr(), row:'a'},
+      {key:'usuario', label:'Usuario / nombre', type:'text', required:true},
+      {key:'mensaje', label:'Resumen del mensaje', type:'textarea', placeholder:'Qué pidió, qué preguntó...'},
+      {key:'link', label:'Link a la conversación o publicación', type:'text', placeholder:'https://...'},
+      {key:'estado', label:'Estado', type:'select', options:['Nuevo','Conversando','Convertido','Descartado'], default:'Nuevo', row:'b'},
+      {key:'respondido', label:'Ya respondí', type:'checkbox', row:'b'},
+    ]
+  },
+  gasto: { title:(e)=> e? 'Editar gasto' : 'Nuevo gasto', fields:[
+      {key:'fecha', label:'Fecha', type:'date', default:()=>todayStr(), row:'a'},
+      {key:'categoria', label:'Categoría', type:'select', options:['Filamento','Mantenimiento','Insumos / post-proceso','Envíos','Otro'], default:'Filamento', row:'a'},
+      {key:'monto', label:'Monto', type:'number', default:0},
+      {key:'nota', label:'Detalle', type:'text', placeholder:'Ej: Boquilla 0.4mm'},
+    ]
+  },
+  retiro: { title:(e)=> 'Retiro del fondo de ahorro', fields:[
+      {key:'fecha', label:'Fecha', type:'date', default:()=>todayStr(), row:'a'},
+      {key:'monto', label:'Monto retirado', type:'number', default:0, row:'a'},
+      {key:'nota', label:'Motivo', type:'text', placeholder:'Ej: usé $10.000 para otra cosa'},
+    ]
+  },
+};
+
+function openForm(type, item){
+  const schema = SCHEMAS[type];
+  document.getElementById('modalTitle').textContent = schema.title(item);
+  const body = document.getElementById('modalBody');
+  const rows = {}; const order = [];
+  schema.fields.forEach(f=>{ const r=f.row||f.key; if(!rows[r]){rows[r]=[];order.push(r);} rows[r].push(f); });
+  body.innerHTML = order.map(r=>{ const fs=rows[r]; const inner=fs.map(f=>renderField(f,item,type)).join(''); return fs.length>1?`<div class="field-row">${inner}</div>`:inner; }).join('');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('modalSaveBtn').onclick = ()=>saveForm(type, item);
+}
+function renderField(f, item, type){
+  const val = item ? item[f.key] : (typeof f.default==='function' ? f.default() : f.default);
+  const id = 'fld_'+f.key;
+  if(type==='pedido' && f.key==='filamentoId'){
+    const opts = ['<option value="">— ninguno (no descontar stock) —</option>'].concat(DB.filamentos.map(fl=>`<option value="${fl.id}" ${fl.id===val?'selected':''}>${esc(fl.marca||'')} ${esc(fl.tipo)} ${esc(fl.color||'')} (${fl.pesoRestante}g)</option>`));
+    return `<div class="field"><label>${f.label}</label><select id="${id}">${opts.join('')}</select></div>`;
+  }
+  if(f.type==='select') return `<div class="field"><label>${f.label}</label><select id="${id}">${f.options.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select></div>`;
+  if(f.type==='textarea') return `<div class="field"><label>${f.label}</label><textarea id="${id}">${val||''}</textarea></div>`;
+  if(f.type==='checkbox') return `<div class="field field-check"><input type="checkbox" id="${id}" ${val?'checked':''}><label style="margin:0">${f.label}</label></div>`;
+  if(f.type==='color') return `<div class="field"><label>${f.label}</label><input type="color" id="${id}" value="${val||'#0095F6'}" style="height:38px;padding:4px;"></div>`;
+  return `<div class="field"><label>${f.label}</label><input type="${f.type}" id="${id}" value="${val!==undefined&&val!==null?val:''}" placeholder="${f.placeholder||''}"></div>`;
+}
+async function saveForm(type, item){
+  const schema = SCHEMAS[type];
+  const data = item ? {...item} : {id:uid()};
+  let valid = true;
+  schema.fields.forEach(f=>{
+    const el = document.getElementById('fld_'+f.key);
+    let v;
+    if(f.type==='checkbox') v = el.checked;
+    else if(f.type==='number') v = el.value===''? 0 : Number(el.value);
+    else v = el.value;
+    if(f.required && !v){ valid=false; el.style.borderColor='var(--danger)'; }
+    data[f.key] = v;
+  });
+  if(!valid){ toast('Completá los campos obligatorios'); return; }
+
+  if(type==='retiro'){
+    DB.finanzas.retirosFondo = DB.finanzas.retirosFondo || [];
+    DB.finanzas.retirosFondo.unshift(data);
+    await save('finanzas');
+    closeModal(); renderPage();
+    toast('Retiro registrado');
+    return;
+  }
+
+  const map = {pedido:'pedidos', filamento:'filamentos', modelo:'modelos', lead:'leads', gasto:'gastos'};
+  const key = map[type];
+  const idx = DB[key].findIndex(x=>x.id===data.id);
+  const prevFondoPct = metaPct();
+  const esNuevo = idx===-1;
+  const estadoAnterior = !esNuevo ? DB[key][idx].estado : null;
+  const yaDescontado = !esNuevo ? DB[key][idx].stockDescontado : false;
+
+  if(idx>-1) DB[key][idx]=data; else DB[key].unshift(data);
+
+  // Módulo 2: descuento automático de stock al pasar a Listo/Enviado/Entregado por primera vez
+  if(type==='pedido' && data.filamentoId && data.gramosUsados>0 && !data.stockDescontado){
+    const disparaDescuento = ['Listo','Enviado','Entregado'].includes(data.estado);
+    if(disparaDescuento){
+      const f = DB.filamentos.find(x=>x.id===data.filamentoId);
+      if(f){
+        const merma = Number(DB.config.mermaPct||0);
+        const totalUsar = Number(data.gramosUsados) * (1+merma/100);
+        f.pesoRestante = Math.max(0, Number(f.pesoRestante||0) - totalUsar);
+        await save('filamentos');
+        data.stockDescontado = true;
+        const idx2 = DB[key].findIndex(x=>x.id===data.id);
+        DB[key][idx2] = data;
+        toast(`Stock descontado: ${Math.round(totalUsar)}g de ${f.marca||''} ${f.tipo} (incluye ${merma}% de merma)`);
+      }
+    }
+  }
+
+  await save(key);
+  closeModal(); renderNav(); renderPage();
+
+  // Módulo 1: animación del Bambu-Ómetro si el fondo subió (pedido marcado como cobrado)
+  if(type==='pedido'){
+    const newPct = metaPct();
+    if(newPct > prevFondoPct) setTimeout(()=>{ const el=document.getElementById('goalFill'); if(el){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); } }, 50);
+  }
+  if(!(type==='pedido' && data.filamentoId && data.gramosUsados>0)) toast('Guardado');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+function closeModalConfirm(){
+  if(confirm('¿Salir sin guardar los cambios?')) closeModal();
+}
+async function removeItem(key, id, label){
+  const idx = DB[key].findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  const [removed] = DB[key].splice(idx,1);
+  renderNav(); renderPage();
+  let undone = false;
+  toast(`${label[0].toUpperCase()+label.slice(1)} eliminado`, 'Deshacer', ()=>{
+    undone = true;
+    DB[key].splice(idx,0,removed);
+    renderNav(); renderPage();
+  });
+  setTimeout(async ()=>{ if(!undone) await save(key); }, 4600);
+}
+
+/* ============ PAGE RENDER ============ */
+let pedidoSearch = '';
+function renderPage(opts){
+  if(opts && opts.search!==undefined) pedidoSearch = opts.search;
+  const titles = {dashboard:['Resumen','Tu taller, de un vistazo'], pedidos:['Pedidos','Todo lo que estás imprimiendo y entregando'],
+    clientes:['Clientes','Quién te compra y cuánto'], filamentos:['Filamento','Stock de carretes y consumo'],
+    presupuestos:['Presupuestos','Calculá precios y guardalos'], modelos:['Modelos','Tu catálogo de piezas listas para vender'],
+    leads:['Redes (Instagram / Facebook)','Seguimiento manual de mensajes y publicaciones'],
+    gastos:['Gastos','Lo que sale del bolsillo del taller'],
+    finanzas:['Finanzas y Metas','Bambu-Ómetro, dólar, máquinas y punto de equilibrio'],
+    config:['Configuración','Datos de tu negocio, valores por defecto y backup']};
+  document.getElementById('pageTitle').textContent = titles[current][0];
+  document.getElementById('pageSub').textContent = titles[current][1];
+  const actions = document.getElementById('topbarActions');
+  const content = document.getElementById('content');
+
+  if(current==='dashboard'){ actions.innerHTML=''; content.innerHTML = renderDashboard(); }
+  else if(current==='pedidos'){ actions.innerHTML = addBtn('pedido','Nuevo pedido'); content.innerHTML = renderPedidos(); }
+  else if(current==='clientes'){ actions.innerHTML=''; content.innerHTML = renderClientes(); }
+  else if(current==='filamentos'){ actions.innerHTML = addBtn('filamento','Nuevo carrete'); content.innerHTML = renderFilamentos(); }
+  else if(current==='presupuestos'){ actions.innerHTML=''; content.innerHTML = renderPresupuestos(); attachCalc(); }
+  else if(current==='modelos'){ actions.innerHTML = addBtn('modelo','Nuevo modelo'); content.innerHTML = renderModelos(); }
+  else if(current==='leads'){ actions.innerHTML = addBtn('lead','Nuevo contacto'); content.innerHTML = renderLeads(); }
+  else if(current==='gastos'){ actions.innerHTML = addBtn('gasto','Nuevo gasto'); content.innerHTML = renderGastos(); }
+  else if(current==='finanzas'){ actions.innerHTML=''; content.innerHTML = renderFinanzas(); }
+  else if(current==='config'){ actions.innerHTML=''; content.innerHTML = renderConfig(); }
+}
+function addBtn(type,label){ return `<button class="btn btn-primary" onclick="openForm('${type}')">${ICONS.plus}${label}</button>`; }
+function badge(estado){
+  const map={Pendiente:'b-pendiente',Imprimiendo:'b-imprimiendo',Listo:'b-listo',Enviado:'b-enviado',Entregado:'b-entregado',Cancelado:'b-cancelado',Nuevo:'b-nuevo',Conversando:'b-conversando',Convertido:'b-convertido',Descartado:'b-descartado'};
+  return `<span class="badge ${map[estado]||'b-pendiente'}">${estado}</span>`;
+}
+function emptyBlock(title,sub){ return `<div class="empty"><b>${title}</b>${sub}</div>`; }
+function waBtn(contacto, msg){
+  const d = waDigits(contacto); if(!d) return '';
+  const txt = msg ? `?text=${encodeURIComponent(msg)}` : '';
+  return `<a class="btn btn-wa btn-sm" href="https://wa.me/${d}${txt}" target="_blank" rel="noopener" title="Escribir por WhatsApp">${ICONS.wa}</a>`;
+}
+
+/* ---- Dashboard ---- */
+function metaPct(){ const obj = Number(DB.config.metaObjetivo||0); if(!obj) return 0; return Math.min(100, Math.round((fondoAhorro()/obj)*1000)/10); }
+function renderDashboard(){
+  const activos = DB.pedidos.filter(p=>!['Entregado','Cancelado'].includes(p.estado));
+  const atrasados = DB.pedidos.filter(isAtrasado);
+  const esteMes = todayStr().slice(0,7);
+  const ingresosMes = DB.pedidos.filter(p=>p.fecha && p.fecha.startsWith(esteMes) && p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
+  const gastosMes = DB.gastos.filter(g=>g.fecha && g.fecha.startsWith(esteMes)).reduce((s,g)=>s+Number(g.monto||0),0);
+  const bajoStock = DB.filamentos.filter(f=>lowStock(f)||humedadRiesgo(f));
+  const sinResponder = DB.leads.filter(l=>!l.respondido);
+  const proximas = activos.filter(p=>p.fechaEntrega && p.fechaEntrega>=todayStr()).sort((a,b)=>a.fechaEntrega.localeCompare(b.fechaEntrega)).slice(0,5);
+  const maquinasCriticas = DB.maquinas.filter(m=>estadoMantenimiento(m)==='danger');
+
+  const porCobrar = DB.pedidos.filter(p=>p.estado!=='Cancelado' && p.estadoPago!=='Pagado completo').reduce((s,p)=>{
+    const calcTotal = Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0);
+    return s + (calcTotal - Number(p.anticipo||0));
+  },0);
+
+  let bannerHtml = '';
+  if(atrasados.length) bannerHtml += `<div class="banner">${ICONS.alert}Tenés ${atrasados.length} pedido(s) atrasado(s) — <a onclick="goTo('pedidos')" style="cursor:pointer">verlos</a></div>`;
+  if(maquinasCriticas.length) bannerHtml += `<div class="banner warnb">${ICONS.alert}${maquinasCriticas.map(m=>m.nombre).join(', ')} necesita mantenimiento — <a onclick="goTo('finanzas')" style="cursor:pointer">ver detalle</a></div>`;
+
+  const stats = `<div class="grid-stats">
+    <div class="stat-card"><div class="label">Pedidos activos</div><div class="value">${activos.length}</div><div class="foot">${DB.pedidos.length} en total</div></div>
+    <div class="stat-card"><div class="label">Ingresos del mes</div><div class="value grad">${money(ingresosMes)}</div><div class="foot">pedidos no cancelados</div></div>
+    <div class="stat-card"><div class="label">Ganancia neta del mes</div><div class="value ${ (ingresosMes-gastosMes)<0?'danger':'' }">${money(ingresosMes-gastosMes)}</div><div class="foot">ingresos − gastos</div></div>
+    <div class="stat-card"><div class="label">Por cobrar</div><div class="value ${porCobrar>0?'warn':''}">${money(porCobrar)}</div><div class="foot">señas y saldos pendientes</div></div>
+    <div class="stat-card"><div class="label">Filamento bajo</div><div class="value ${bajoStock.length?'warn':''}">${bajoStock.length}</div><div class="foot">bajo stock o riesgo humedad</div></div>
+  </div>`;
+
+  const proxPedidos = activos.slice(0,5).map(p=>`<div class="mini-row"><div><div class="t">${esc(p.cliente)} — ${esc(p.modelo||'sin modelo')}</div><div class="s">${fmtDate(p.fecha)} · ${p.origen||''}</div></div>${badge(p.estado)}</div>`).join('') || emptyBlock('Sin pedidos activos','Cuando crees un pedido, aparece acá.');
+  const entregasList = proximas.map(p=>`<div class="mini-row"><div><div class="t">${esc(p.cliente)}</div><div class="s">${esc(p.modelo||'')}</div></div><div class="s" style="font-weight:700;color:var(--text)">${fmtDate(p.fechaEntrega)}</div></div>`).join('') || emptyBlock('Sin entregas próximas','Agregá una fecha de entrega a tus pedidos.');
+  const stockList = DB.filamentos.slice(0,5).map(f=>{ const pct=f.pesoTotal?Math.round((f.pesoRestante/f.pesoTotal)*100):0; return `<div class="mini-row"><div><div class="t">${esc(f.marca||'')} ${esc(f.tipo)} ${esc(f.color||'')}</div><div class="s">${f.pesoRestante}g de ${f.pesoTotal}g</div></div><span class="badge ${pct<=15?'b-cancelado':pct<=40?'b-pendiente':'b-entregado'}">${pct}%</span></div>`; }).join('') || emptyBlock('Sin carretes cargados','Agregá tu primer filamento en la sección Filamento.');
+  const leadsList = sinResponder.slice(0,5).map(l=>`<div class="mini-row"><div><div class="t">${esc(l.usuario)}</div><div class="s">${l.plataforma} · ${fmtDate(l.fecha)}</div></div>${badge(l.estado||'Nuevo')}</div>`).join('') || emptyBlock('Estás al día','No hay mensajes sin responder.');
+  const topModelos = (()=>{
+    const counts = {};
+    DB.pedidos.forEach(p=>{ if(!p.modelo) return; const k=p.modelo.trim(); if(!k) return; counts[k]=(counts[k]||0)+Number(p.cantidad||1); });
+    const arr = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    if(!arr.length) return emptyBlock('Sin datos todavía','Cuando registres pedidos, vas a ver tus piezas más pedidas.');
+    const max = arr[0][1];
+    return arr.map(([name,n])=>`<div class="mini-row"><div class="t">${esc(name)}</div><div style="flex:1;margin:0 12px;height:6px;background:var(--surface-3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${Math.round((n/max)*100)}%;background:var(--grad);"></div></div><span class="cell-val">${n}</span></div>`).join('');
+  })();
+
+  const pct = metaPct();
+  const goalPanel = `<div class="panel"><h3>Bambu-Ómetro <a onclick="goTo('finanzas')">ver finanzas →</a></h3>${renderGoal(pct)}</div>`;
+
+  return bannerHtml + stats + `
+  <div class="dash-grid">
+    <div class="panel"><h3>Pedidos activos <a onclick="goTo('pedidos')">ver todos →</a></h3>${proxPedidos}</div>
+    <div class="panel"><h3>Próximas entregas <a onclick="goTo('pedidos')">ver todos →</a></h3>${entregasList}</div>
+  </div>
+  <div class="dash-grid" style="margin-top:16px;">
+    <div class="panel"><h3>Ingresos vs gastos (6 meses)</h3>${renderChart()}</div>
+    <div class="panel"><h3>Stock de filamento <a onclick="goTo('filamentos')">ver todo →</a></h3>${stockList}</div>
+  </div>
+  <div class="dash-grid" style="margin-top:16px;">
+    ${goalPanel}
+    <div class="panel"><h3>Sin responder en redes <a onclick="goTo('leads')">ver todo →</a></h3>${leadsList}</div>
+  </div>
+  <div class="dash-grid" style="margin-top:16px;">
+    <div class="panel"><h3>Piezas más pedidas</h3>${topModelos}</div>
+    <div class="panel"><h3>Máquinas <a onclick="goTo('finanzas')">ver todo →</a></h3>${renderMaquinasList()}</div>
+  </div>
+  `;
+}
+function renderGoal(pct){
+  const objetivo = Number(DB.config.metaObjetivo||0);
+  const fondo = fondoAhorro();
+  const falta = Math.max(0, objetivo-fondo);
+  return `<div class="goal-wrap">
+    <div class="goal-top"><div class="amt">${money(fondo)} <small>de ${money(objetivo)}</small></div><span class="goal-pct">${pct}%</span></div>
+    <div class="goal-bar"><div class="goal-bar-fill" id="goalFill" style="width:${pct}%"></div></div>
+    <div class="goal-foot"><span>Meta: ${esc(DB.config.metaNombre||'Sin definir')}</span><span>Faltan ${money(falta)}</span></div>
+  </div>`;
+}
+function renderMaquinasList(){
+  if(!DB.maquinas.length) return emptyBlock('Sin máquinas cargadas','Agregalas desde Finanzas y Metas.');
+  return DB.maquinas.map(m=>{
+    const st = estadoMantenimiento(m);
+    const desde = m.horasUso - (m.ultimaAlertaHoras||0);
+    const pct = Math.min(100, Math.round((desde/m.alertaCada)*100));
+    return `<div class="machine-row"><div><div class="m-name">${esc(m.nombre)}</div><div class="m-sub">${m.horasUso}hs totales · ${Math.round(desde)}hs desde último mantenimiento</div></div><div class="machine-bar"><div class="${st==='danger'?'mant-danger':st==='warn'?'mant-warn':'mant-ok'}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+}
+function renderChart(){
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(d.toISOString().slice(0,7)); }
+  const data = months.map(m=>{
+    const ing = DB.pedidos.filter(p=>p.fecha&&p.fecha.startsWith(m)&&p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
+    const gas = DB.gastos.filter(g=>g.fecha&&g.fecha.startsWith(m)).reduce((s,g)=>s+Number(g.monto||0),0);
+    return {m, ing, gas};
+  });
+  const max = Math.max(1, ...data.map(d=>Math.max(d.ing,d.gas)));
+  const cols = data.map(d=>{
+    const hIn = Math.max(2, Math.round((d.ing/max)*100));
+    const hOut = Math.max(2, Math.round((d.gas/max)*100));
+    const label = new Date(d.m+'-01').toLocaleDateString('es-AR',{month:'short'}).replace('.','');
+    return `<div class="chart-col"><div class="chart-bars"><div class="chart-bar in" style="height:${hIn}px"></div><div class="chart-bar out" style="height:${hOut}px"></div></div><div class="chart-label">${label}</div></div>`;
+  }).join('');
+  return `<div class="chart-wrap">${cols}</div><div class="chart-legend"><span><i class="dot" style="background:var(--blue)"></i>Ingresos</span><span><i class="dot" style="background:var(--text-faint)"></i>Gastos</span></div>`;
+}
+
+/* ---- Pedidos ---- */
+let pedidoFilter = 'Todos';
+let pedidoSort = 'reciente';
+function renderPedidos(){
+  const estados = ['Todos','Pendiente','Imprimiendo','Listo','Enviado','Entregado','Cancelado'];
+  let list = DB.pedidos.filter(p=> pedidoFilter==='Todos' || p.estado===pedidoFilter);
+  if(pedidoSearch) list = list.filter(p=> (p.cliente||'').toLowerCase().includes(pedidoSearch.toLowerCase()));
+  
+  if(pedidoSort==='reciente') list = [...list].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  else if(pedidoSort==='entrega') list = [...list].sort((a,b)=>(a.fechaEntrega||'9999').localeCompare(b.fechaEntrega||'9999'));
+  else if(pedidoSort==='precio') list = [...list].sort((a,b)=>{
+      const tA = Number(a.precio||0)+Number(a.costoEnvio||0)+Number(a.costoEmbalaje||0);
+      const tB = Number(b.precio||0)+Number(b.costoEnvio||0)+Number(b.costoEmbalaje||0);
+      return tB - tA;
+  });
+
+  const toolbar = `<div class="toolbar">
+    <select onchange="pedidoFilter=this.value;renderPage()">${estados.map(e=>`<option ${e===pedidoFilter?'selected':''}>${e}</option>`).join('')}</select>
+    <select onchange="pedidoSort=this.value;renderPage()">
+      <option value="reciente" ${pedidoSort==='reciente'?'selected':''}>Más recientes</option>
+      <option value="entrega" ${pedidoSort==='entrega'?'selected':''}>Entrega más próxima</option>
+      <option value="precio" ${pedidoSort==='precio'?'selected':''}>Mayor precio total</option>
+    </select>
+    <input class="search" type="text" placeholder="Buscar cliente..." value="${esc(pedidoSearch)}" oninput="renderPage({search:this.value})">
+    <div class="grow"></div>
+    <span style="color:var(--text-faint);font-size:12px;">${list.length} pedido(s)</span>
+  </div>`;
+
+  if(!list.length) return toolbar + emptyBlock('No hay pedidos acá','Probá cambiar el filtro o creá un pedido nuevo.');
+  const rows = list.map(p=>{
+    const totalPed = Number(p.precio||0) + Number(p.costoEnvio||0) + Number(p.costoEmbalaje||0);
+    const pagoClass = p.estadoPago==='Pagado completo'?'pay-completo':p.estadoPago==='Seña pagada'?'pay-seña':'pay-sinseña';
+    const waMsg = p.estado==='Listo' ? `Hola ${p.cliente}! Tu pedido de ${p.modelo||'tu impresión'} ya está listo 🙌`
+      : p.estado==='Enviado' ? `Hola ${p.cliente}! Tu pedido de ${p.modelo||'tu impresión'} ya salió en camino 🚚`
+      : `Hola ${p.cliente}! Te escribo por tu pedido de ${p.modelo||'tu impresión 3D'}.`;
+    return `<div class="card-row">
+      <div class="main-cell"><div class="name">${esc(p.cliente)}</div><div class="sub">${esc(p.modelo||'—')} ${p.color?'· '+esc(p.color):''} · ${p.origen||''}</div></div>
+      <div><span class="cell-label">Cant.</span><span class="cell-val">${p.cantidad||1}</span></div>
+      <div>
+        <span class="cell-label">Total</span><span class="cell-val">${money(totalPed)}</span>
+        <div class="${pagoClass}" style="font-size:10.5px;font-weight:700;margin-top:2px;">${p.estadoPago||'Sin seña'}</div>
+        <div style="font-size:9.5px;color:var(--text-faint);margin-top:2px;">(Emb: ${money(p.costoEmbalaje||0)})</div>
+      </div>
+      <div><span class="cell-label">Envío</span><span class="cell-val" style="font-size:11.5px;font-family:inherit;">${envioShort(p)}</span></div>
+      <div>${badge(p.estado)} ${isAtrasado(p)?'<span class="badge b-atrasado">Atrasado</span>':''}<div style="font-size:11px;color:var(--text-faint);margin-top:5px;">${p.fechaEntrega?'Entrega '+fmtDate(p.fechaEntrega):fmtDate(p.fecha)}</div></div>
+      <div class="row-actions">
+        ${waBtn(p.contacto, waMsg)}
+        <button class="btn btn-ghost btn-sm" title="Duplicar pedido" onclick="duplicarPedido('${p.id}')">⎘</button>
+        <button class="btn btn-ghost btn-sm" onclick='openForm("pedido", ${JSON.stringify(p).replace(/'/g,"&apos;")})'>${ICONS.edit}</button>
+        <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('pedidos','${p.id}','este pedido')">${ICONS.trash}</button>
+      </div>
+    </div>`;
+  }).join('');
+  return toolbar + `<div class="cards">${rows}</div>`;
+}
+async function duplicarPedido(id){
+  const p = DB.pedidos.find(x=>x.id===id); if(!p) return;
+  const copy = {...p, id:uid(), fecha:todayStr(), fechaEntrega:'', estado:'Pendiente', estadoPago:'Sin seña', anticipo:0, stockDescontado:false};
+  DB.pedidos.unshift(copy);
+  await save('pedidos'); renderNav(); renderPage();
+  toast('Pedido duplicado');
+}
+function envioShort(p){
+  if(!p.envio || p.envio.startsWith('Sin')) return 'Retira';
+  if(p.envio.startsWith('A coordinar')) return 'A coordinar';
+  return `Envío ${money(p.costoEnvio)}`;
+}
+
+/* ---- Clientes (computado) ---- */
+function renderClientes(){
+  const map = {};
+  DB.pedidos.forEach(p=>{
+    const key = (p.cliente||'Sin nombre').trim().toLowerCase();
+    if(!map[key]) map[key] = {cliente:p.cliente||'Sin nombre', contacto:p.contacto, pedidos:0, total:0, pagado:0, ultimo:'', origen:{}};
+    const c = map[key];
+    
+    const currTotal = Number(p.precio||0) + Number(p.costoEnvio||0) + Number(p.costoEmbalaje||0);
+    c.pedidos++; 
+    if(p.estado!=='Cancelado') c.total += currTotal;
+    c.pagado += Number(p.anticipo||0) + (p.estadoPago==='Pagado completo'? (currTotal - Number(p.anticipo||0)) : 0);
+    
+    if(!c.ultimo || (p.fecha||'') > c.ultimo) c.ultimo = p.fecha||c.ultimo;
+    if(p.contacto) c.contacto = p.contacto;
+    c.origen[p.origen||'Otro'] = (c.origen[p.origen||'Otro']||0)+1;
+  });
+  const list = Object.values(map).sort((a,b)=>b.total-a.total);
+  if(!list.length) return emptyBlock('Todavía no tenés clientes','Aparecen automáticamente cuando creás pedidos.');
+  const rows = list.map(c=>{
+    const init = c.cliente.trim().slice(0,2).toUpperCase();
+    return `<div class="cliente-row">
+      <div class="cliente-avatar">${esc(init)}</div>
+      <div><div class="name">${esc(c.cliente)}</div><div class="sub">${esc(c.contacto||'sin contacto')} · último pedido ${fmtDate(c.ultimo)}</div></div>
+      <div class="cliente-stats">
+        <div><span>Pedidos</span><b>${c.pedidos}</b></div>
+        <div><span>Facturado</span><b>${money(c.total)}</b></div>
+        <div><span>Cobrado</span><b>${money(c.pagado)}</b></div>
+      </div>
+      <div class="row-actions">${waBtn(c.contacto)}<button class="btn btn-ghost btn-sm" onclick="goTo('pedidos',{search:'${esc(c.cliente).replace(/'/g,"")}'})">Ver pedidos</button></div>
+    </div>`;
+  }).join('');
+  return `<div class="cliente-grid">${rows}</div>`;
+}
+
+/* ---- Filamentos ---- */
+let filaSearch = '';
+function renderFilamentos(){
+  const toolbar = `<div class="toolbar"><input class="search grow" type="text" placeholder="Buscar por marca, tipo o color..." value="${esc(filaSearch)}" oninput="filaSearch=this.value;renderPage()"></div>`;
+  let list = DB.filamentos;
+  if(filaSearch) list = list.filter(f=>`${f.marca||''} ${f.tipo||''} ${f.color||''}`.toLowerCase().includes(filaSearch.toLowerCase()));
+  if(!DB.filamentos.length) return emptyBlock('Sin carretes cargados','Agregá tu primer filamento para controlar el stock.');
+  if(!list.length) return toolbar + emptyBlock('Sin resultados','Probá con otra búsqueda.');
+  const cards = list.map(f=>{
+    const pct = f.pesoTotal? Math.round((f.pesoRestante/f.pesoTotal)*100):0;
+    const low = lowStock(f);
+    const humid = humedadRiesgo(f);
+    const dias = daysSince(f.fechaApertura);
+    const flags = (low?`<span class="flag flag-low">Stock bajo</span>`:'') + (humid?`<span class="flag flag-humid">Riesgo humedad (${dias}d)</span>`:'');
+    return `<div class="fila-card ${low?'fila-low':humid?'fila-humid':''}">
+      <div class="spool" style="background:conic-gradient(${f.colorHex||'#0095F6'} 0 ${pct}%, var(--surface-3) ${pct}% 100%);"><span class="pct">${pct}%</span></div>
+      <div class="fila-info">
+        <div class="name">${esc(f.marca||'')} ${esc(f.tipo)}</div>
+        <div class="meta">${esc(f.color||'')}${f.tempOptima?' · '+f.tempOptima+'°C':''}</div>
+        <div class="grams">${f.pesoRestante}g / ${f.pesoTotal}g · ${money(f.precioKg)}/kg</div>
+        ${flags?`<div class="fila-flags">${flags}</div>`:''}
+      </div>
+      <div class="fila-actions">
+        <button class="btn btn-ghost btn-sm" onclick="usarFilamento('${f.id}')">− Usar</button>
+        <button class="btn btn-ghost btn-sm" onclick='openForm("filamento", ${JSON.stringify(f).replace(/'/g,"&apos;")})'>${ICONS.edit}</button>
+        <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('filamentos','${f.id}','este carrete')">${ICONS.trash}</button>
+      </div>
+    </div>`;
+  }).join('');
+  return toolbar + `<div class="fila-grid">${cards}</div>`;
+}
+async function usarFilamento(id){
+  const f = DB.filamentos.find(x=>x.id===id); if(!f) return;
+  const g = prompt(`¿Cuántos gramos de "${f.marca||''} ${f.tipo}" usaste (sin contar merma)?`, '20');
+  if(g===null) return;
+  const n = Number(g);
+  if(isNaN(n) || n<=0){ toast('Cantidad inválida'); return; }
+  const merma = Number(DB.config.mermaPct||0);
+  const total = n*(1+merma/100);
+  f.pesoRestante = Math.max(0, Number(f.pesoRestante||0) - total);
+  await save('filamentos'); renderNav(); renderPage();
+  toast(`Restados ${Math.round(total)}g (incluye ${merma}% merma)`);
+}
+
+/* ---- Modelos ---- */
+let modeloSearch = '';
+function renderModelos(){
+  if(!DB.modelos.length) return emptyBlock('Todavía no tenés modelos cargados','Cargá las piezas que ofrecés para armar presupuestos más rápido.');
+  const toolbar = `<div class="toolbar"><input class="search grow" type="text" placeholder="Buscar modelo o categoría..." value="${esc(modeloSearch)}" oninput="modeloSearch=this.value;renderPage()"></div>`;
+  let list = DB.modelos;
+  if(modeloSearch) list = list.filter(m=>`${m.nombre||''} ${m.categoria||''}`.toLowerCase().includes(modeloSearch.toLowerCase()));
+  if(!list.length) return toolbar + emptyBlock('Sin resultados','Probá con otra búsqueda.');
+  const cards = list.map(m=>`
+    <div class="modelo-card">
+      <div class="modelo-photo">${m.foto?`<img src="${esc(m.foto)}" onerror="this.parentElement.innerHTML='Sin imagen'">`:'Sin imagen'}</div>
+      <div class="modelo-body">
+        <div class="cat">${esc(m.categoria||'sin categoría')}</div>
+        <div class="name">${esc(m.nombre)}</div>
+        <div class="modelo-meta">
+          <div><span>Tiempo</span>${m.tiempoHoras||0} hs</div>
+          <div><span>Peso</span>${m.gramos||0} g</div>
+          <div><span>Sugerido</span>${money(m.precioSugerido)}</div>
+        </div>
+        <div class="file">${esc(m.archivo||'sin archivo asociado')}</div>
+        <div class="row-actions" style="justify-content:flex-start;margin-top:2px;">
+          <button class="btn btn-ghost btn-sm" onclick='openForm("modelo", ${JSON.stringify(m).replace(/'/g,"&apos;")})'>${ICONS.edit}</button>
+          <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('modelos','${m.id}','este modelo')">${ICONS.trash}</button>
+        </div>
+      </div>
+    </div>`).join('');
+  return toolbar + `<div class="modelo-grid">${cards}</div>`;
+}
+
+/* ---- Leads ---- */
+function renderLeads(){
+  const infoBox = `<div class="panel" style="margin-bottom:16px;"><h3>Por qué esto es manual</h3><div style="color:var(--text-dim);font-size:13px;line-height:1.6;">Meta no ofrece una API pública para leer mensajes de Instagram, Facebook o Marketplace desde una página externa como esta — ni siquiera con una app aprobada, en el caso de Marketplace. Por eso esta sección funciona como agenda rápida: usá los accesos directos de la barra lateral para abrir tus bandejas reales, y anotá acá lo importante en 20 segundos para no perder seguimiento.</div></div>`;
+  if(!DB.leads.length) return infoBox + emptyBlock('Sin contactos cargados','Anotá los mensajes de Instagram y Facebook Marketplace para no perder ningún pedido.');
+  const cards = DB.leads.map(l=>`
+    <div class="lead-card">
+      <div class="lead-platform ${l.plataforma==='Instagram'?'ig':l.plataforma==='Facebook Marketplace'?'fb':'otro'}">
+        ${l.plataforma==='Instagram'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/></svg>':l.plataforma==='Facebook Marketplace'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18l-1.5 11a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>'}
+      </div>
+      <div class="lead-body">
+        <div class="lead-top"><div class="user">${esc(l.usuario)} ${l.respondido?'':'<span style="color:var(--warn);font-size:11px;font-weight:700;"> · sin responder</span>'}</div>${badge(l.estado||'Nuevo')}</div>
+        <div class="lead-msg">${esc(l.mensaje||'sin detalle')}</div>
+        <div class="lead-meta"><span class="lead-date">${l.plataforma} · ${fmtDate(l.fecha)}</span>${l.link?`<a class="lead-link" href="${esc(l.link)}" target="_blank" rel="noopener">abrir conversación →</a>`:''}</div>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" title="Marcar respondido" onclick="toggleRespondido('${l.id}')">${l.respondido?'✓':'○'}</button>
+        <button class="btn btn-ghost btn-sm" title="Convertir en pedido" onclick="convertLead('${l.id}')">${ICONS.convert}</button>
+        <button class="btn btn-ghost btn-sm" onclick='openForm("lead", ${JSON.stringify(l).replace(/'/g,"&apos;")})'>${ICONS.edit}</button>
+        <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('leads','${l.id}','este contacto')">${ICONS.trash}</button>
+      </div>
+    </div>`).join('');
+  return infoBox + `<div class="cards">${cards}</div>`;
+}
+async function toggleRespondido(id){
+  const l = DB.leads.find(x=>x.id===id); if(!l) return;
+  l.respondido = !l.respondido;
+  await save('leads'); renderNav(); renderPage();
+}
+async function convertLead(id){
+  const l = DB.leads.find(x=>x.id===id); if(!l) return;
+  l.estado='Convertido'; l.respondido=true;
+  await save('leads');
+  openForm('pedido', {id:uid(), cliente:l.usuario, contacto:l.usuario, origen:l.plataforma, fecha:todayStr()});
+  renderNav();
+}
+
+/* ---- Gastos ---- */
+function renderGastos(){
+  if(!DB.gastos.length) return emptyBlock('Sin gastos registrados','Cargá filamento comprado, mantenimiento, insumos, lo que sea que salga del bolsillo del taller.');
+  const total = DB.gastos.reduce((s,g)=>s+Number(g.monto||0),0);
+  const rows = DB.gastos.map(g=>`
+    <div class="gasto-row">
+      <span class="gasto-cat">${esc(g.categoria)}</span>
+      <span class="nota">${esc(g.nota||'')}</span>
+      <span style="font-size:11.5px;color:var(--text-faint);">${fmtDate(g.fecha)}</span>
+      <span class="monto">${money(g.monto)}</span>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick='openForm("gasto", ${JSON.stringify(g).replace(/'/g,"&apos;")})'>${ICONS.edit}</button>
+        <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('gastos','${g.id}','este gasto')">${ICONS.trash}</button>
+      </div>
+    </div>`).join('');
+  return `<div class="cards">${rows}</div><div class="panel" style="margin-top:14px;display:flex;justify-content:space-between;"><b>Total gastado</b><span class="cell-val" style="font-size:15px;">${money(total)}</span></div>`;
+}
+
+/* ---- Presupuestos ---- */
+function renderPresupuestos(){
+  const filaOpts = DB.filamentos.map(f=>`<option value="${f.id}">${esc(f.marca||'')} ${esc(f.tipo)} ${esc(f.color||'')} — ${money(f.precioKg)}/kg</option>`).join('');
+  const left = `<div>
+    <div class="calc-field"><label>Cliente (opcional)</label><input id="cCliente" type="text" placeholder="Para guardar el presupuesto"></div>
+    <div class="calc-field"><label>Filamento a usar</label><select id="cFila">${filaOpts || '<option value="">Cargá un filamento primero</option>'}</select></div>
+    <div class="calc-row2"><div class="calc-field"><label>Horas de impresión</label><input id="cHoras" type="number" value="3" step="0.5"></div><div class="calc-field"><label>Minutos adicionales</label><input id="cMinutos" type="number" value="0"></div></div>
+    <div class="calc-row2"><div class="calc-field"><label>Gramos de filamento</label><input id="cGramos" type="number" value="50"></div><div class="calc-field"><label>Insumos extra ($)</label><input id="cInsumos" type="number" value="0"></div></div>
+    <div class="calc-field"><label>Costo de envío (si aplica)</label><input id="cEnvio" type="number" value="0"></div>
+    <div class="calc-field">
+      <label>Margen de ganancia (multiplicador)</label>
+      <input id="cMargen" type="number" value="${DB.config.margenGanancia||4}" step="0.5">
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setMargen(3)">Mayorista ×3</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setMargen(4)">Minorista ×4</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setMargen(5)">Llaveros ×5</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="guardarPresupuesto()">${ICONS.plus} Guardar presupuesto</button><button class="btn btn-ghost" onclick="copiarPresupuesto()">${ICONS.copy} Copiar para WhatsApp</button></div>
+    <div class="info-box" style="margin-top:14px;">Los costos de luz, desgaste de máquina, margen de error e insumos usan los valores fijos de <a onclick="goTo('config')" style="cursor:pointer;font-weight:700;">Configuración</a>.</div>
+  </div>`;
+  const right = `<div class="calc-result panel" id="calcResult"></div>`;
+  const historyRows = DB.presupuestos.slice(0,8).map(p=>`
+    <div class="mini-row"><div><div class="t">${esc(p.cliente||'Sin nombre')} · ${p.gramos}g · ${p.horas}hs</div><div class="s">${fmtDate(p.fecha)}</div></div>
+    <div style="display:flex;align-items:center;gap:8px;"><span class="cell-val">${money(p.total)}</span><button class="btn btn-ghost btn-sm" onclick="removeItem('presupuestos','${p.id}','este presupuesto')">${ICONS.trash}</button></div></div>`).join('') || emptyBlock('Sin presupuestos guardados','Calculá uno arriba y guardalo para tener historial.');
+  return `<div class="calc-wrap"><div class="panel">${left}</div>${right}</div><div class="panel" style="margin-top:16px;"><h3>Historial de presupuestos</h3>${historyRows}</div>`;
+}
+function setMargen(n){ document.getElementById('cMargen').value = n; updateCalc(); }
+function calcTotal(){
+  const fila = DB.filamentos.find(f=>f.id===document.getElementById('cFila').value);
+  const horas = Number(document.getElementById('cHoras').value||0);
+  const minutos = Number(document.getElementById('cMinutos').value||0);
+  const gramos = Number(document.getElementById('cGramos').value||0);
+  const insumosExtra = Number(document.getElementById('cInsumos').value||0);
+  const envio = Number(document.getElementById('cEnvio').value||0);
+  const margen = Number(document.getElementById('cMargen').value|| DB.config.margenGanancia||4);
+
+  const precioKwh = Number(DB.config.precioKwh||0);
+  const consumoW = Number(DB.config.consumoW||0);
+  const vidaUtil = Number(DB.config.vidaUtilHoras||0);
+  const costoRepuestos = Number(DB.config.costoRepuestos||0);
+  const margenErrorPct = Number(DB.config.margenErrorPct||0);
+  const markupInsumosPct = Number(DB.config.markupInsumosPct!==undefined ? DB.config.markupInsumosPct : 30);
+  const markupMLPct = Number(DB.config.markupMLPct!==undefined ? DB.config.markupMLPct : 20);
+
+  const horasTotales = horas + (minutos/60);
+  const precioMaterial = fila ? gramos*(Number(fila.precioKg||0)/1000) : 0;
+  const precioLuz = (consumoW/1000)*horasTotales*precioKwh;
+  const desgaste = vidaUtil>0 ? (costoRepuestos/vidaUtil)*horasTotales : 0;
+  const subtotalBase = precioMaterial+precioLuz+desgaste;
+  const margenError = subtotalBase*(margenErrorPct/100);
+  const costoTotalSinInsumos = subtotalBase+margenError;
+  const insumosConMarkup = insumosExtra*(1+markupInsumosPct/100);
+  const productoTotal = (costoTotalSinInsumos+insumosConMarkup)*margen;
+  const totalACobrar = productoTotal + envio;
+  const precioML = productoTotal*(1+markupMLPct/100) + envio;
+
+  return {fila,gramos,horas,minutos,horasTotales,insumosExtra,envio,margen,precioMaterial,precioLuz,desgaste,margenErrorPct,margenError,costoTotalSinInsumos,markupInsumosPct,insumosConMarkup,markupMLPct,totalACobrar,precioML,total:totalACobrar};
+}
+function attachCalc(){
+  ['cFila','cGramos','cHoras','cMinutos','cInsumos','cEnvio','cMargen'].forEach(id=>{ const el=document.getElementById(id); if(el) el.oninput=updateCalc; });
+  updateCalc();
+}
+function updateCalc(){
+  const r = calcTotal();
+  const dolar = DB.finanzas.dolar;
+  const usdLine = dolar && dolar.venta ? `<div class="result-line" style="border-top:1px dashed var(--border);padding-top:10px;margin-top:4px;"><span>≈ en USD (blue ${money(dolar.venta)})</span><span class="v">u$s ${(r.totalACobrar/dolar.venta).toLocaleString('es-AR',{maximumFractionDigits:2})}</span></div>` : '';
+  document.getElementById('calcResult').innerHTML = `
+    <h3>Presupuesto</h3>
+    <div class="result-line"><span>Precio material (${r.gramos}g)</span><span class="v">${money(r.precioMaterial)}</span></div>
+    <div class="result-line"><span>Precio luz</span><span class="v">${money(r.precioLuz)}</span></div>
+    <div class="result-line"><span>Desgaste máquina</span><span class="v">${money(r.desgaste)}</span></div>
+    <div class="result-line"><span>Margen de error (${r.margenErrorPct}%)</span><span class="v">${money(r.margenError)}</span></div>
+    <div class="result-line" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;"><span style="font-weight:700;">Costo total (sin insumos)</span><span class="v" style="font-weight:700;">${money(r.costoTotalSinInsumos)}</span></div>
+    <div class="result-line"><span>Insumos (+${r.markupInsumosPct}%)</span><span class="v">${money(r.insumosConMarkup)}</span></div>
+    <div class="result-line"><span>Envío</span><span class="v">${money(r.envio)}</span></div>
+    <div class="result-total"><span class="l">Total a cobrar (×${r.margen})</span><span class="v">${money(r.totalACobrar)}</span></div>
+    ${usdLine}
+    <div style="background:var(--warn-dim);border:1px solid #F5DFAE;border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;">
+      <div style="font-size:10.5px;color:var(--warn);font-weight:700;text-transform:uppercase;">Precio sugerido MercadoLibre (+${r.markupMLPct}%)</div>
+      <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--warn);">${money(r.precioML)}</div>
+    </div>`;
+}
+async function guardarPresupuesto(){
+  const r = calcTotal();
+  const cliente = document.getElementById('cCliente').value;
+  DB.presupuestos.unshift({id:uid(), cliente, gramos:r.gramos, horas:r.horas, total:Math.round(r.total), fecha:todayStr()});
+  await save('presupuestos'); renderPage();
+  toast('Presupuesto guardado');
+}
+function copiarPresupuesto(){
+  const r = calcTotal();
+  const txt = `Hola! Te paso el presupuesto:\n· Pieza: ${r.fila? (r.fila.marca+' '+r.fila.tipo) : 'a definir'}\n· Tiempo estimado: ${r.horas} hs\n· Total: ${money(Math.round(r.totalACobrar))}\n¿Confirmamos el pedido?`;
+  navigator.clipboard.writeText(txt).then(()=>toast('Copiado, pegalo en WhatsApp')).catch(()=>toast('No se pudo copiar'));
+}
+
+/* ---- Finanzas y Metas (Módulo 1) ---- */
+function renderFinanzas(){
+  const pct = metaPct();
+  const dolar = DB.finanzas.dolar;
+  const fxLine = dolar ? `<span class="fx-pill">Compra ${money(dolar.compra)}</span><span class="fx-pill">Venta ${money(dolar.venta)}</span><span style="color:var(--text-faint);font-size:11px;">act. ${new Date(dolar.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>` : `<span style="color:var(--text-faint);">Sin consultar todavía</span>`;
+
+  const retiros = (DB.finanzas.retirosFondo||[]).slice(0,6).map(r=>`<div class="mini-row"><div><div class="t">${money(r.monto)}</div><div class="s">${esc(r.nota||'')} · ${fmtDate(r.fecha)}</div></div></div>`).join('') || emptyBlock('Sin retiros','El fondo crece solo con lo cobrado en pedidos.');
+
+  const goalPanel = `<div class="panel">
+    <h3>Bambu-Ómetro <a onclick="openForm('retiro')" style="cursor:pointer">+ registrar retiro</a></h3>
+    ${renderGoal(pct)}
+    <div style="margin-top:16px;">${retiros}</div>
+  </div>`;
+
+  const fxPanel = `<div class="panel">
+    <h3>Cotización del dólar (Blue)</h3>
+    <div class="fx-row" id="fxRow">${fxLine}</div>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="actualizarDolar()">${ICONS.download} Actualizar cotización</button>
+    <div class="info-box" style="margin-top:12px;">Se usa para mostrar el total del presupuesto también en dólares (fuente: DolarAPI.com).</div>
+  </div>`;
+
+  const maquinasPanel = `<div class="panel">
+    <h3>Máquinas y amortización</h3>
+    ${DB.maquinas.map(m=>{
+      const st = estadoMantenimiento(m);
+      const desde = m.horasUso - (m.ultimaAlertaHoras||0);
+      const pctm = Math.min(100, Math.round((desde/m.alertaCada)*100));
+      return `<div class="machine-row">
+        <div><div class="m-name">${esc(m.nombre)}</div><div class="m-sub">${m.horasUso}hs totales · alerta cada ${m.alertaCada}hs · ${Math.round(desde)}hs desde el último mantenimiento</div></div>
+        <div class="machine-bar"><div class="${st==='danger'?'mant-danger':st==='warn'?'mant-warn':'mant-ok'}" style="width:${pctm}%"></div></div>
+        <div class="row-actions">
+          <button class="btn btn-ghost btn-sm" title="Sumar horas de impresión" onclick="promptSumarHoras('${m.id}')">${ICONS.clock}</button>
+          <button class="btn btn-ghost btn-sm" title="Marcar mantenimiento hecho" onclick="marcarMantenimiento('${m.id}')">✓</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  const beData = breakEvenData();
+  const beMax = Math.max(1, ...beData.map(d=>Math.max(d.ing,d.gas)));
+  const bePanel = `<div class="panel">
+    <h3>Punto de equilibrio (últimos 6 meses)</h3>
+    <div class="break-even-wrap">
+      ${beData.map(d=>`
+        <div class="be-row"><span class="be-label">${d.label} ing.</span><div class="be-track"><div class="be-fill ing" style="width:${Math.max(4,Math.round((d.ing/beMax)*100))}%">${money(d.ing)}</div></div></div>
+        <div class="be-row"><span class="be-label">${d.label} cost.</span><div class="be-track"><div class="be-fill gas" style="width:${Math.max(4,Math.round((d.gas/beMax)*100))}%">${money(d.gas)}</div></div></div>
+      `).join('')}
+    </div>
+    <div class="info-box" style="margin-top:12px;">"Costos" acá suma tus gastos reales del mes más una estimación de luz y desgaste de máquina por las horas cargadas. El mes en que la barra verde supera a la roja, estás ganando plata neta.</div>
+  </div>`;
+
+  return `<div class="finance-grid">${goalPanel}${fxPanel}</div><div class="finance-grid" style="margin-top:16px;">${maquinasPanel}${bePanel}</div>`;
+}
+function promptSumarHoras(id){
+  const h = prompt('¿Cuántas horas de impresión sumar a esta máquina?', '3');
+  if(h===null) return;
+  const n = Number(h);
+  if(isNaN(n) || n<=0){ toast('Cantidad inválida'); return; }
+  sumarHorasMaquina(id, n);
+}
+function breakEvenData(){
+  const months = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(d.toISOString().slice(0,7)); }
+  const horasTotalMes = DB.maquinas.reduce((s,m)=>s+Number(m.horasUso||0),0) / 6; // estimación pareja si no hay más detalle
+  return months.map(m=>{
+    const ing = DB.pedidos.filter(p=>p.fecha&&p.fecha.startsWith(m)&&p.estado!=='Cancelado').reduce((s,p)=>s+Number(p.precio||0)+Number(p.costoEnvio||0)+Number(p.costoEmbalaje||0),0);
+    const gastosReales = DB.gastos.filter(g=>g.fecha&&g.fecha.startsWith(m)).reduce((s,g)=>s+Number(g.monto||0),0);
+    const luzEstim = (Number(DB.config.consumoW||0)/1000)*horasTotalMes*Number(DB.config.precioKwh||0);
+    const desgasteEstim = Number(DB.config.vidaUtilHoras||0)>0 ? (Number(DB.config.costoRepuestos||0)/Number(DB.config.vidaUtilHoras||0))*horasTotalMes : 0;
+    const label = new Date(m+'-01').toLocaleDateString('es-AR',{month:'short'}).replace('.','');
+    return {label, ing, gas: gastosReales+luzEstim+desgasteEstim};
+  });
+}
+
+/* ---- Config ---- */
+function renderConfig(){
+  const c = DB.config;
+  return `<div class="config-form panel">
+    <div class="field"><label>Nombre del negocio</label><input id="cfNombre" type="text" value="${esc(c.nombreNegocio)}"></div>
+    <div class="field-row">
+      <div class="field"><label>Instagram</label><input id="cfIg" type="text" value="${esc(c.instagram)}"></div>
+      <div class="field"><label>WhatsApp (con código de país)</label><input id="cfWa" type="text" placeholder="5491122334455" value="${esc(c.whatsapp)}"></div>
+    </div>
+    <div class="field"><label>Símbolo de moneda</label><input id="cfMoneda" type="text" value="${esc(c.moneda)}" style="max-width:80px;"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar configuración</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Costos fijos del taller</h3>
+    <div class="info-box" style="margin-bottom:4px;">Estos valores alimentan la calculadora de Presupuestos: precio de la luz, desgaste de la máquina y margen de seguridad.</div>
+    <div class="field-row">
+      <div class="field"><label>Precio del kWh ($)</label><input id="cfKwh" type="number" value="${c.precioKwh}"></div>
+      <div class="field"><label>Consumo de la impresora (W)</label><input id="cfW" type="number" value="${c.consumoW}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Vida útil de la máquina (hs)</label><input id="cfVida" type="number" value="${c.vidaUtilHoras}"></div>
+      <div class="field"><label>Costo de repuestos en esa vida útil ($)</label><input id="cfRepuestos" type="number" value="${c.costoRepuestos}"></div>
+    </div>
+    <div class="field"><label>Margen de error (%)</label><input id="cfErrorPct" type="number" value="${c.margenErrorPct}" style="max-width:120px;"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar costos fijos</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Ganancia y plataformas</h3>
+    <div class="field"><label>Margen de ganancia por defecto (multiplicador)</label><input id="cfMargen" type="number" value="${c.margenGanancia}" step="0.5" style="max-width:120px;"></div>
+    <div class="field-row">
+      <div class="field"><label>Recargo por insumos extra (%)</label><input id="cfInsumosPct" type="number" value="${c.markupInsumosPct}"></div>
+      <div class="field"><label>Recargo sugerido MercadoLibre (%)</label><input id="cfMLPct" type="number" value="${c.markupMLPct}"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Meta de ahorro (Bambu-Ómetro)</h3>
+    <div class="field"><label>Qué estás ahorrando</label><input id="cfMetaNombre" type="text" value="${esc(c.metaNombre)}"></div>
+    <div class="field"><label>Objetivo ($)</label><input id="cfMetaObjetivo" type="number" value="${c.metaObjetivo}"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar meta</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Stock de filamento e insumos</h3>
+    <div class="field-row">
+      <div class="field"><label>% de merma por defecto (soportes/faldas)</label><input id="cfMerma" type="number" value="${c.mermaPct!==undefined?c.mermaPct:8}"></div>
+      <div class="field"><label>Alertar stock bajo desde (g)</label><input id="cfAlertaG" type="number" value="${c.alertaGramos!==undefined?c.alertaGramos:150}"></div>
+    </div>
+    <div class="field"><label>Alertar riesgo de humedad después de (días abierto)</label><input id="cfAlertaDias" type="number" value="${c.alertaHumedadDias!==undefined?c.alertaHumedadDias:90}" style="max-width:160px;"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Backup de tus datos</h3>
+    <div class="info-box">Todo se guarda solo en este navegador. Si cambiás de compu, borrás el historial, o querés tener una copia de seguridad, exportá un archivo y guardalo en tu Google Drive o donde prefieras.</div>
+    <div class="backup-actions">
+      <button class="btn btn-primary" onclick="exportarBackup()">${ICONS.download} Exportar backup</button>
+      <label class="btn btn-ghost" style="margin:0;">${ICONS.upload} Restaurar backup<input type="file" accept="application/json" style="display:none" onchange="importarBackup(event)"></label>
+    </div>
+  </div>`;
+}
+async function saveConfig(){
+  const get = id => document.getElementById(id);
+  DB.config = {
+    ...DB.config,
+    nombreNegocio: get('cfNombre') ? get('cfNombre').value : DB.config.nombreNegocio,
+    instagram: get('cfIg') ? get('cfIg').value : DB.config.instagram,
+    whatsapp: get('cfWa') ? get('cfWa').value : DB.config.whatsapp,
+    moneda: (get('cfMoneda') ? get('cfMoneda').value : DB.config.moneda) || '$',
+    precioKwh: get('cfKwh') ? Number(get('cfKwh').value||0) : DB.config.precioKwh,
+    consumoW: get('cfW') ? Number(get('cfW').value||0) : DB.config.consumoW,
+    vidaUtilHoras: get('cfVida') ? Number(get('cfVida').value||0) : DB.config.vidaUtilHoras,
+    costoRepuestos: get('cfRepuestos') ? Number(get('cfRepuestos').value||0) : DB.config.costoRepuestos,
+    margenErrorPct: get('cfErrorPct') ? Number(get('cfErrorPct').value||0) : DB.config.margenErrorPct,
+    margenGanancia: get('cfMargen') ? Number(get('cfMargen').value||4) : DB.config.margenGanancia,
+    markupInsumosPct: get('cfInsumosPct') ? Number(get('cfInsumosPct').value||30) : DB.config.markupInsumosPct,
+    markupMLPct: get('cfMLPct') ? Number(get('cfMLPct').value||20) : DB.config.markupMLPct,
+    metaNombre: get('cfMetaNombre') ? get('cfMetaNombre').value : DB.config.metaNombre,
+    metaObjetivo: get('cfMetaObjetivo') ? Number(get('cfMetaObjetivo').value||0) : DB.config.metaObjetivo,
+    mermaPct: get('cfMerma') ? Number(get('cfMerma').value||0) : DB.config.mermaPct,
+    alertaGramos: get('cfAlertaG') ? Number(get('cfAlertaG').value||150) : DB.config.alertaGramos,
+    alertaHumedadDias: get('cfAlertaDias') ? Number(get('cfAlertaDias').value||90) : DB.config.alertaHumedadDias,
   };
-
-  try {
-    // URL CON MODELO GEMINI 2.5 FLASH CORREGIDO
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": GEMINI_API_KEY
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    const data = await response.json();
-    loading.remove();
-
-    if (data.error) {
-      msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error: ${data.error.message}</div>`;
-      return;
-    }
-
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Procesado, señor.";
-
-    msgs.innerHTML += `<div class="msg-ai">${replyText}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-
-  } catch (err) {
-    loading.remove();
-    msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error de conexión con la API de Gemini.</div>`;
-  }
+  await save('config');
+  renderNav(); renderPage();
+  toast('Configuración guardada');
 }
-    // Disparadores simples para acciones automáticas
-    const lower = txt.toLowerCase();
-    if (lower.includes('apaga') || lower.includes('apagar')) {
-      DB.impresoras.forEach(i => i.activa = false);
-      renderCurrentView();
-    } else if (lower.includes('cancela') || lower.includes('cancelar')) {
-      const p = DB.pedidos.find(x => x.estado !== 'Cancelado');
-      if (p) { p.estado = 'Cancelado'; renderCurrentView(); }
-    }
-
-    msgs.innerHTML += `<div class="msg-ai">${replyText}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-
-  } catch (err) {
-    loading.remove();
-    msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error conectando con la API de Gemini.</div>`;
-  }
+function exportarBackup(){
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `m3diir-backup-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('Backup descargado');
+}
+async function importarBackup(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  if(!confirm('Esto va a reemplazar todos tus datos actuales con los del backup. ¿Continuar?')) { ev.target.value=''; return; }
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){ DB[k] = parsed[k]||(k==='maquinas'?MAQUINAS_DEFAULT.map(m=>({...m})):[]); await save(k); }
+    DB.config = parsed.config || DB.config; await save('config');
+    DB.finanzas = parsed.finanzas || DB.finanzas; await save('finanzas');
+    renderNav(); renderPage();
+    toast('Backup restaurado');
+  }catch(e){ toast('El archivo no es un backup válido'); }
+  ev.target.value='';
 }
 
-// Inicializa el Dashboard
-renderCurrentView();
+/* ============ THEME ============ */
+function applyTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.getElementById('themeLabel').textContent = t==='dark' ? 'Modo oscuro' : 'Modo claro';
+}
+async function toggleTheme(){
+  const cur = document.body.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  applyTheme(cur);
+  DB.config.theme = cur;
+  await save('config');
+}
+
+/* ============ KEYBOARD / MISC ============ */
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModalConfirm(); });
+
+/* ============ INIT ============ */
+(async function init(){
+  await loadAll();
+  applyTheme(DB.config.theme || 'light');
+  renderNav();
+  renderPage();
+  document.getElementById('appLoading').style.display = 'none';
+  if(!storageOk) toast('No se pudo acceder al almacenamiento persistente: tus datos no se guardarán al cerrar.');
+})();
 </script>
 </body>
 </html>
