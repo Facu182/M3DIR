@@ -208,14 +208,14 @@ input,select,textarea{font-family:inherit;}
 <div class="jarvis-panel" id="jarvis-panel">
   <div class="jp-header">
     <strong style="color:var(--teal)">J.A.R.V.I.S. OS</strong>
-    <span style="font-size:10px;color:var(--tx2);margin-left:auto">v2.6 Gemini Fixed</span>
+    <span style="font-size:10px;color:var(--tx2);margin-left:auto">v2.7 Fixed Auth</span>
     <button onclick="toggleJarvis()" style="background:none;border:none;color:var(--tx2);cursor:pointer">✕</button>
   </div>
   <div class="jp-msgs" id="jp-msgs">
-    <div class="msg-ai">Hola, Facundo. Soy J.A.R.V.I.S. Estoy conectado al panel y a Google Search. ¿Qué necesitas analizar o cambiar?</div>
+    <div class="msg-ai">Hola, Facundo. Soy J.A.R.V.I.S. Estoy conectado al panel y listo. ¿Qué necesitás revisar o cambiar hoy?</div>
   </div>
   <div class="jp-input-row">
-    <input class="jp-input" id="jp-input" placeholder="Pregunta o pide una orden..." onkeydown="if(event.key==='Enter')sendToJarvis()">
+    <input class="jp-input" id="jp-input" placeholder="Escribí una orden o consulta..." onkeydown="if(event.key==='Enter')sendToJarvis()">
     <button class="btn-primary" onclick="sendToJarvis()">Enviar</button>
   </div>
 </div>
@@ -227,8 +227,8 @@ input,select,textarea{font-family:inherit;}
    CONFIGURACIÓN DE API KEY Y ESTADO DEL TALLER
 ═══════════════════════════════════════════════════════════════ */
 
-// 🔑 PEGÁ ACÁ TU API KEY COMPLETA DE GOOGLE GEMINI:
-const GEMINI_API_KEY = "AQ.Ab8RN6I8oiq6gIB8N1myzAQnk46CioSPdjvwCE7fqPr63NMdRg";
+// 🔑 CLAVE DE API OFICIAL
+const GEMINI_API_KEY = "AQ.Ab8RN6KCoM3nf06Gm7ATWuq-I6k4su3knxYr4lNAWuNrjpA9Iw";
 
 const DB = {
   activeView: 'dashboard',
@@ -646,7 +646,7 @@ function toggleTheme() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   INTEGRACIÓN J.A.R.V.I.S. + GEMINI REST API (CORREGIDA)
+   J.A.R.V.I.S. + GEMINI REST API CON AUTH HEADERS CORREGIDOS
 ═══════════════════════════════════════════════════════════════ */
 
 function toggleJarvis() {
@@ -671,43 +671,33 @@ async function sendToJarvis() {
   msgs.appendChild(loading);
   msgs.scrollTop = msgs.scrollHeight;
 
-  if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 10) {
-    loading.style.opacity = '1';
-    loading.textContent = "⚠️ Ingresá tu API Key de Google Gemini en la variable GEMINI_API_KEY.";
-    return;
-  }
-
-  // Agrega el mensaje al historial
-  geminiChatHistory.push({
-    role: "user",
-    parts: [{ text: txt }]
-  });
-
-  // System Prompt que incluye datos en tiempo real
-  const contextPrompt = `Sos J.A.R.V.I.S., el asistente de IA inteligente de M3DIR Studio (taller de impresión 3D de Facundo en Los Polvorines, Buenos Aires, Argentina).
-Hablás en español rioplatense, sos directo, eficiente, técnico e ingenioso (estilo Iron Man).
+  const contextPrompt = `Sos J.A.R.V.I.S., el asistente virtual inteligente del taller de impresión 3D M3DIR Studio (dueño: Facundo, en Los Polvorines, Argentina).
+Hablás en español rioplatense, sos ingenioso, elegante, conciso y muy técnico.
 
 Estado actual del taller en tiempo real:
 - Impresoras: ${JSON.stringify(DB.impresoras)}
-- Stock Filamentos: ${JSON.stringify(DB.filamentos)}
+- Filamentos: ${JSON.stringify(DB.filamentos)}
 - Pedidos: ${JSON.stringify(DB.pedidos)}
 
-Si el usuario te pide crear un pedido, cancelar algo o modificar impresoras, indícale la acción en tu texto de forma clara. Respondé siempre en texto plano o HTML liviano.`;
+Respondé brevemente y de forma útil.`;
 
   const requestBody = {
     contents: [
       {
         role: "user",
-        parts: [{ text: contextPrompt + "\n\nConsulta del usuario: " + txt }]
+        parts: [{ text: contextPrompt + "\n\nConsulta: " + txt }]
       }
     ]
   };
 
   try {
-    // URL Corregida usando la v1beta estable de Gemini
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    // LLAMADA OFICIAL PASANDO LA CLAVE VIA HEADER X-Goog-Api-Key PARA EVITAR ERRORES OAUTH
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GEMINI_API_KEY
+      },
       body: JSON.stringify(requestBody)
     });
 
@@ -715,25 +705,20 @@ Si el usuario te pide crear un pedido, cancelar algo o modificar impresoras, ind
     loading.remove();
 
     if (data.error) {
-      msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error Gemini API: ${data.error.message}</div>`;
+      msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error: ${data.error.message}</div>`;
       return;
     }
 
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Operación procesada, señor.";
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Procesado, señor.";
 
-    geminiChatHistory.push({
-      role: "model",
-      parts: [{ text: replyText }]
-    });
-
-    // Pequeña lógica local para alterar el estado si se detectan intenciones clave
-    const lowerTxt = txt.toLowerCase();
-    if (lowerTxt.includes('cancela') || lowerTxt.includes('cancelar')) {
-      const p = DB.pedidos.find(x => x.estado !== 'Cancelado');
-      if (p) { p.estado = 'Cancelado'; renderCurrentView(); }
-    } else if (lowerTxt.includes('apaga') || lowerTxt.includes('apagar')) {
+    // Disparadores simples para acciones automáticas
+    const lower = txt.toLowerCase();
+    if (lower.includes('apaga') || lower.includes('apagar')) {
       DB.impresoras.forEach(i => i.activa = false);
       renderCurrentView();
+    } else if (lower.includes('cancela') || lower.includes('cancelar')) {
+      const p = DB.pedidos.find(x => x.estado !== 'Cancelado');
+      if (p) { p.estado = 'Cancelado'; renderCurrentView(); }
     }
 
     msgs.innerHTML += `<div class="msg-ai">${replyText}</div>`;
@@ -741,7 +726,7 @@ Si el usuario te pide crear un pedido, cancelar algo o modificar impresoras, ind
 
   } catch (err) {
     loading.remove();
-    msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error de red o conexión con la API de Gemini.</div>`;
+    msgs.innerHTML += `<div class="msg-ai" style="color:var(--red)">Error conectando con la API de Gemini.</div>`;
   }
 }
 
