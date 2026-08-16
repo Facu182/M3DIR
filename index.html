@@ -222,6 +222,7 @@ h1,h2,h3{font-family:var(--font-display);}
 /* ---------- MODELOS ---------- */
 .modelo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .modelo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:border-color .14s var(--ease),box-shadow .14s var(--ease),transform .14s var(--ease);}
+.modelo-card.fila-low{border-color:var(--danger);}
 .modelo-card:hover{border-color:var(--border-soft);box-shadow:var(--shadow-md);transform:translateY(-2px);}
 .modelo-photo{width:100%;height:150px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-faint);font-size:11.5px;font-weight:600;position:relative;}
 .modelo-photo img{width:100%;height:100%;object-fit:cover;}
@@ -289,6 +290,17 @@ h1,h2,h3{font-family:var(--font-display);}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
 .modal{background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .2s var(--ease);}
 @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+/* ---------- VISOR 3D (STL / 3MF) ---------- */
+.viewer-overlay{position:fixed;inset:0;background:rgba(15,18,16,.65);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:70;padding:20px;}
+.viewer-overlay.open{display:flex;animation:overlayIn .16s var(--ease);}
+.viewer-modal{background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:720px;box-shadow:var(--shadow-lg);animation:modalIn .2s var(--ease);overflow:hidden;}
+.viewer-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
+.viewer-head h3{font-size:15px;margin:0;font-weight:800;word-break:break-all;}
+.viewer-canvas-wrap{width:100%;height:min(60vh,460px);background:var(--surface-2);display:flex;align-items:center;justify-content:center;position:relative;}
+.viewer-canvas-wrap canvas{display:block;touch-action:none;}
+.viewer-loading{color:var(--text-faint);font-size:13px;font-weight:600;}
+.viewer-foot{padding:10px 20px;font-size:11px;color:var(--text-faint);text-align:center;border-top:1px solid var(--border-soft);}
 .modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);}
 .modal-head h3{font-size:15px;margin:0;font-weight:800;}
 .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:13px;}
@@ -444,6 +456,19 @@ body[data-theme="dark"] .switch::after{left:17px;background:#fff;}
 
 <div class="toast" id="toast"></div>
 
+<div class="viewer-overlay" id="viewerOverlay">
+  <div class="viewer-modal">
+    <div class="viewer-head"><h3 id="viewerTitle">Vista 3D</h3><button class="btn btn-ghost btn-sm" onclick="closeViewer3D()">✕</button></div>
+    <div class="viewer-canvas-wrap" id="viewerCanvasWrap"></div>
+    <div class="viewer-foot">Arrastrá para orbitar · Scroll o pellizcá para hacer zoom</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/3MFLoader.js"></script>
 <script>
 /* ============ ICONS ============ */
 const ICONS = {
@@ -466,15 +491,18 @@ const ICONS = {
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
   upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0 4 4m-4-4-4 4"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  stock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/><path d="M16.5 5.5l-9 5"/></svg>',
+  orbit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="4"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><path d="M12 3v3M12 18v3"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17H7a5 5 0 0 1 0-10h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>'
 };
 
 /* ============ STORAGE ============ */
-const KEYS = {pedidos:'pedidos:list', filamentos:'filamentos:list', modelos:'modelos:list', leads:'leads:list', presupuestos:'presupuestos:list', gastos:'gastos:list', maquinas:'maquinas:list', finanzas:'finanzas:data', config:'config:data'};
-let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gastos:[], maquinas:[], finanzas:{ retirosFondo:[], dolar:null },
+const KEYS = {pedidos:'pedidos:list', filamentos:'filamentos:list', modelos:'modelos:list', leads:'leads:list', presupuestos:'presupuestos:list', gastos:'gastos:list', maquinas:'maquinas:list', stock:'stock:list', finanzas:'finanzas:data', config:'config:data'};
+let DB = { pedidos:[], filamentos:[], modelos:[], leads:[], presupuestos:[], gastos:[], maquinas:[], stock:[], finanzas:{ retirosFondo:[], dolar:null },
   config:{nombreNegocio:'M3diir', instagram:'@m3diir', whatsapp:'', moneda:'$',
   precioKwh:140, consumoW:120, vidaUtilHoras:4320, costoRepuestos:150000, margenErrorPct:5, margenGanancia:4, markupInsumosPct:30, markupMLPct:20,
-  metaObjetivo:1300000, metaNombre:'Bambu Lab A1 Combo', mermaPct:8, alertaGramos:150, alertaHumedadDias:90} };
+  metaObjetivo:1300000, metaNombre:'Bambu Lab A1 Combo', mermaPct:8, alertaGramos:150, alertaHumedadDias:90, alertaStockUnidades:2} };
 
 const MAQUINAS_DEFAULT = [
   {id:'ender3v3', nombre:'Ender 3 V3 Plus', horasUso:0, alertaCada:100, ultimaAlertaHoras:0},
@@ -492,7 +520,7 @@ window.storage = {
 };
 
 async function loadAll(){
-  for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){
+  for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas','stock']){
     try{ const r = await window.storage.get(KEYS[k]); DB[k] = r ? JSON.parse(r.value) : []; }catch(e){ DB[k] = []; }
   }
   if(!DB.maquinas || !DB.maquinas.length) DB.maquinas = MAQUINAS_DEFAULT.map(m=>({...m}));
@@ -562,6 +590,119 @@ function compressImage(file, maxDim=900, quality=0.82){
   });
 }
 function fmtBytes(n){ n=Number(n||0); if(!n) return '0 KB'; const kb=n/1024; if(kb<1024) return Math.round(kb)+' KB'; return (kb/1024).toFixed(1)+' MB'; }
+
+/* ============ VISOR 3D (Three.js) — thumbnails automáticos y orbit view ============ */
+function ensureThreeLoaded(){
+  if(!window.THREE || !THREE.STLLoader){ toast('El visor 3D no pudo cargar (revisá tu conexión a internet)'); throw new Error('three-not-loaded'); }
+}
+function loadGeometryFromBlob(blob, filename){
+  return new Promise((resolve,reject)=>{
+    ensureThreeLoaded();
+    const ext = (filename.split('.').pop()||'').toLowerCase();
+    const url = URL.createObjectURL(blob);
+    if(ext==='stl'){
+      const loader = new THREE.STLLoader();
+      loader.load(url, geo=>{ URL.revokeObjectURL(url); resolve(geo); }, undefined, err=>{ URL.revokeObjectURL(url); reject(err); });
+    } else if(ext==='3mf'){
+      if(!THREE.ThreeMFLoader){ URL.revokeObjectURL(url); reject(new Error('no-3mf-loader')); return; }
+      const loader = new THREE.ThreeMFLoader();
+      loader.load(url, obj=>{ URL.revokeObjectURL(url); resolve(obj); }, undefined, err=>{ URL.revokeObjectURL(url); reject(err); });
+    } else { URL.revokeObjectURL(url); reject(new Error('formato no soportado')); }
+  });
+}
+function buildViewObject(geometryOrObject){
+  if(geometryOrObject.isBufferGeometry){
+    geometryOrObject.computeVertexNormals();
+    const mat = new THREE.MeshStandardMaterial({color:0xad5a2c, metalness:0.12, roughness:0.55});
+    return new THREE.Mesh(geometryOrObject, mat);
+  }
+  return geometryOrObject;
+}
+function frameObject(object, camera){
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  object.position.sub(center);
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const dist = maxDim * 2.2;
+  camera.position.set(dist*0.6, dist*0.55, dist*0.85);
+  camera.lookAt(0,0,0);
+  return maxDim;
+}
+async function generateThumbnailFromFile(file, size=480){
+  ensureThreeLoaded();
+  const geometryOrObject = await loadGeometryFromBlob(file, file.name);
+  const object = buildViewObject(geometryOrObject);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf2f3ee);
+  scene.add(object);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 20000);
+  frameObject(object, camera);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.1); scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.85); dir.position.set(1,2,3); scene.add(dir);
+  const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
+  renderer.setSize(size, size);
+  renderer.render(scene, camera);
+  const dataUrl = renderer.domElement.toDataURL('image/jpeg', 0.86);
+  renderer.dispose();
+  return dataUrl;
+}
+let _viewerRenderer=null, _viewerAnimFrame=null, _viewerControls=null;
+async function openViewer3DFromBlob(blob, filename, title){
+  try{ ensureThreeLoaded(); }catch(e){ return; }
+  document.getElementById('viewerTitle').textContent = title || filename || 'Vista 3D';
+  document.getElementById('viewerOverlay').classList.add('open');
+  const wrap = document.getElementById('viewerCanvasWrap');
+  wrap.innerHTML = '<div class="viewer-loading">Cargando modelo...</div>';
+  try{
+    const geometryOrObject = await loadGeometryFromBlob(blob, filename);
+    wrap.innerHTML = '';
+    initViewerScene(wrap, geometryOrObject);
+  }catch(e){
+    wrap.innerHTML = '<div class="viewer-loading">No se pudo abrir el archivo (formato no compatible o dañado)</div>';
+  }
+}
+function initViewerScene(container, geometryOrObject){
+  const width = container.clientWidth || 640, height = container.clientHeight || 420;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xeaebe3);
+  const object = buildViewObject(geometryOrObject);
+  scene.add(object);
+  const camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 20000);
+  frameObject(object, camera);
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.1); scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(1,2,3); scene.add(dir);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.35); dir2.position.set(-2,-1,-2); scene.add(dir2);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  container.appendChild(renderer.domElement);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0,0,0);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.update();
+  _viewerRenderer = renderer; _viewerControls = controls;
+  function animate(){
+    _viewerAnimFrame = requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+function closeViewer3D(){
+  document.getElementById('viewerOverlay').classList.remove('open');
+  if(_viewerAnimFrame) cancelAnimationFrame(_viewerAnimFrame);
+  if(_viewerRenderer){ try{ _viewerRenderer.dispose(); _viewerRenderer.domElement.remove(); }catch(e){} }
+  _viewerRenderer=null; _viewerControls=null;
+  document.getElementById('viewerCanvasWrap').innerHTML='';
+}
+async function verModeloEn3D(entityKey, id){
+  const item = DB[entityKey].find(x=>x.id===id);
+  if(!item || !item.archivoMeta) return;
+  const blob = await idbGetBlob(item.archivoMeta.id);
+  if(!blob){ toast('No se encontró el archivo (puede haberse perdido al limpiar datos del navegador)'); return; }
+  openViewer3DFromBlob(blob, item.archivoMeta.name, item.nombre || item.archivoMeta.name);
+}
 function toast(msg, actionLabel, actionFn){
   const t = document.getElementById('toast');
   t.innerHTML = `<span>${msg}</span>` + (actionLabel? `<button class="undo-btn" id="toastAction">${actionLabel}</button>` : '');
@@ -638,8 +779,9 @@ const SECTIONS = [
   {id:'pedidos', label:'Pedidos', icon:'pedidos'},
   {id:'clientes', label:'Clientes', icon:'clientes'},
   {id:'filamentos', label:'Filamento', icon:'filamento'},
-  {id:'presupuestos', label:'Presupuestos', icon:'presupuestos'},
   {id:'modelos', label:'Modelos', icon:'modelos'},
+  {id:'stock', label:'Stock impreso', icon:'stock'},
+  {id:'presupuestos', label:'Presupuestos', icon:'presupuestos'},
   {id:'leads', label:'Redes (IG/FB)', icon:'leads'},
   {id:'gastos', label:'Gastos', icon:'gastos'},
   {id:'finanzas', label:'Finanzas y Metas', icon:'finanzas'},
@@ -654,9 +796,10 @@ function renderNav(){
     if(s.id==='filamentos'){ const n=DB.filamentos.filter(f=>lowStock(f)||humedadRiesgo(f)).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
     if(s.id==='leads'){ const n=DB.leads.filter(l=>!l.respondido).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
     if(s.id==='finanzas'){ const n=DB.maquinas.filter(m=>estadoMantenimiento(m)==='danger').length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
+    if(s.id==='stock'){ const n=DB.stock.filter(stockBajo).length; if(n) badge=`<span class="nav-badge">${n}</span>`; }
     return `<button class="nav-item ${s.id===current?'active':''}" onclick="goTo('${s.id}')">${ICONS[s.icon]}<span>${s.label}</span>${badge}</button>`;
   }).join('');
-  const bnSections = ['dashboard','pedidos','clientes','leads','config'];
+  const bnSections = ['dashboard','pedidos','stock','leads','config'];
   const bn = document.getElementById('bottomNav');
   if(bn){
     bn.innerHTML = bnSections.map(id=>{
@@ -664,11 +807,13 @@ function renderNav(){
       let dot='';
       if(id==='pedidos' && DB.pedidos.some(p=>!['Entregado','Cancelado'].includes(p.estado))) dot='<span class="bn-badge"></span>';
       if(id==='leads' && DB.leads.some(l=>!l.respondido)) dot='<span class="bn-badge"></span>';
+      if(id==='stock' && DB.stock.some(stockBajo)) dot='<span class="bn-badge"></span>';
       return `<button class="${id===current?'active':''}" onclick="goTo('${id}')">${ICONS[s.icon]}${dot}<span>${s.label.split(' ')[0]}</span></button>`;
     }).join('');
   }
 }
 function lowStock(f){ if(!f.pesoTotal) return false; const pctBajo = (f.pesoRestante/f.pesoTotal) <= 0.15; const gramosBajo = f.pesoRestante <= (DB.config.alertaGramos||150); return pctBajo || gramosBajo; }
+function stockBajo(s){ return Number(s.cantidad||0) <= Number(DB.config.alertaStockUnidades!==undefined?DB.config.alertaStockUnidades:2); }
 function humedadRiesgo(f){ const d = daysSince(f.fechaApertura); return d!==null && d >= (DB.config.alertaHumedadDias||90); }
 function isAtrasado(p){ return p.fechaEntrega && p.fechaEntrega < todayStr() && !['Entregado','Cancelado'].includes(p.estado); }
 function goTo(id, opts){ current = id; renderNav(); renderPage(opts); }
@@ -710,13 +855,15 @@ const SCHEMAS = {
     ]
   },
   modelo: { title:(e)=> e? 'Editar modelo' : 'Nuevo modelo', fields: [
+      {key:'_import', label:'Importar desde link (MakerWorld, Printables, etc.)', type:'importlink', importTarget:'modelo'},
       {key:'nombre', label:'Nombre', type:'text', required:true},
       {key:'categoria', label:'Categoría', type:'text', placeholder:'Ej: Decoración, Funcional...', row:'a'},
       {key:'tiempoHoras', label:'Tiempo estimado (hs)', type:'number', row:'a'},
       {key:'gramos', label:'Gramos estimados', type:'number', row:'b'},
       {key:'precioSugerido', label:'Precio sugerido', type:'number', row:'b'},
       {key:'fotoData', label:'Foto del modelo', type:'photo'},
-      {key:'archivoMeta', label:'Archivo 3D (.stl / .3mf)', type:'file3d'},
+      {key:'archivoMeta', label:'Archivo 3D (.stl / .3mf)', type:'file3d', photoKey:'fotoData'},
+      {key:'fuenteUrl', label:'Link de origen (opcional)', type:'text', placeholder:'https://makerworld.com/...'},
       {key:'notas', label:'Notas', type:'textarea'},
     ]
   },
@@ -741,6 +888,20 @@ const SCHEMAS = {
       {key:'fecha', label:'Fecha', type:'date', default:()=>todayStr(), row:'a'},
       {key:'monto', label:'Monto retirado', type:'number', default:0, row:'a'},
       {key:'nota', label:'Motivo', type:'text', placeholder:'Ej: usé $10.000 para otra cosa'},
+    ]
+  },
+  stock: { title:(e)=> e? 'Editar pieza en stock' : 'Nueva pieza en stock', fields: [
+      {key:'_import', label:'Importar desde link (MakerWorld, Printables, etc.)', type:'importlink', importTarget:'stock'},
+      {key:'nombre', label:'Nombre', type:'text', required:true, row:'a'},
+      {key:'categoria', label:'Categoría', type:'text', placeholder:'Ej: Decoración, Funcional...', row:'a'},
+      {key:'cantidad', label:'Cantidad en stock', type:'number', default:1, row:'b'},
+      {key:'precioVenta', label:'Precio de venta', type:'number', default:0, row:'b'},
+      {key:'costoUnitario', label:'Costo de producción (unitario, opcional)', type:'number', default:0, row:'c'},
+      {key:'ubicacion', label:'Ubicación / estante (opcional)', type:'text', row:'c'},
+      {key:'fotoData', label:'Foto de la pieza', type:'photo'},
+      {key:'archivoMeta', label:'Archivo 3D (.stl / .3mf)', type:'file3d', photoKey:'fotoData'},
+      {key:'fuenteUrl', label:'Link de origen (opcional)', type:'text', placeholder:'https://makerworld.com/...'},
+      {key:'notas', label:'Notas', type:'textarea'},
     ]
   },
 };
@@ -768,17 +929,99 @@ function renderField(f, item, type){
   if(f.type==='textarea') return `<div class="field"><label>${f.label}</label><textarea id="${id}">${val||''}</textarea></div>`;
   if(f.type==='checkbox') return `<div class="field field-check"><input type="checkbox" id="${id}" ${val?'checked':''}><label style="margin:0">${f.label}</label></div>`;
   if(f.type==='color') return `<div class="field"><label>${f.label}</label><input type="color" id="${id}" value="${val||'#0095F6'}" style="height:38px;padding:4px;"></div>`;
-  if(f.type==='photo') return `<div class="field"><label>${f.label}</label><div id="wrap_${f.key}">${renderPhotoWidget(f.key, val)}</div></div>`;
-  if(f.type==='file3d') return `<div class="field"><label>${f.label}</label><div id="wrap_${f.key}">${renderFile3dWidget(f.key, val)}</div></div>`;
+  if(f.type==='photo'){
+    const initial = item ? (item[f.key] || item.foto || '') : '';
+    return `<div class="field"><label>${f.label}</label><div id="wrap_${f.key}">${renderPhotoWidget(f.key, initial)}</div></div>`;
+  }
+  if(f.type==='file3d') return `<div class="field"><label>${f.label}</label><div id="wrap_${f.key}">${renderFile3dWidget(f.key, val, f.photoKey||'')}</div></div>`;
+  if(f.type==='importlink') return renderImportLinkWidget(f.importTarget);
   return `<div class="field"><label>${f.label}</label><input type="${f.type}" id="${id}" value="${val!==undefined&&val!==null?val:''}" placeholder="${f.placeholder||''}"></div>`;
+}
+
+/* ---- Importar desde link (MakerWorld, Printables, etc.) — best-effort, con fallback manual ---- */
+function renderImportLinkWidget(target){
+  return `<div class="field" style="background:var(--surface-2);border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:12px;">
+    <label style="display:flex;align-items:center;gap:6px;">${ICONS.link} Importar desde link (MakerWorld, Printables, etc.)</label>
+    <div style="display:flex;gap:8px;">
+      <input id="importLinkUrl" type="text" placeholder="https://makerworld.com/..." style="flex:1;">
+      <button type="button" class="btn btn-primary btn-sm" id="importLinkBtn" onclick="importarDesdeLink('${target}')" style="flex:none;">Importar</button>
+    </div>
+    <div id="importLinkStatus" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Beta: intenta traer foto, nombre, gramos y tiempo automáticamente. Si el sitio no lo permite, completá los campos a mano.</div>
+  </div>`;
+}
+async function importarDesdeLink(target){
+  const input = document.getElementById('importLinkUrl');
+  const url = (input.value||'').trim();
+  const status = document.getElementById('importLinkStatus');
+  const btn = document.getElementById('importLinkBtn');
+  if(!url){ toast('Pegá un link primero'); return; }
+  btn.disabled = true; btn.textContent = 'Importando...';
+  status.textContent = 'Buscando datos en la página...';
+  try{
+    const html = await fetchViaProxy(url);
+    const data = parseImportData(html, url);
+    let algo = false;
+    const elNombre = document.getElementById('fld_nombre');
+    if(data.title && elNombre && !elNombre.value){ elNombre.value = data.title; algo = true; }
+    const elGramos = document.getElementById('fld_gramos');
+    if(data.gramos && elGramos){ elGramos.value = data.gramos; algo = true; }
+    const elTiempo = document.getElementById('fld_tiempoHoras');
+    if(data.tiempoHoras && elTiempo){ elTiempo.value = data.tiempoHoras; algo = true; }
+    const elFuente = document.getElementById('fld_fuenteUrl');
+    if(elFuente){ elFuente.value = url; }
+    if(data.image){
+      _uploadState['fotoData'] = {kind:'link', data:data.image};
+      const wrap = document.getElementById('wrap_fotoData');
+      if(wrap) wrap.innerHTML = renderPhotoWidget('fotoData', data.image);
+      algo = true;
+    }
+    status.textContent = algo ? 'Datos importados. Revisá y completá lo que falte antes de guardar.' : 'No pudimos leer datos automáticamente de ese link. Completá los campos a mano.';
+  }catch(e){
+    status.textContent = 'No pudimos acceder a ese link automáticamente (algunos sitios lo bloquean). Cargá la foto y los datos a mano.';
+  }
+  btn.disabled = false; btn.textContent = 'Importar';
+}
+async function fetchViaProxy(url){
+  const proxies = [
+    'https://corsproxy.io/?url=' + encodeURIComponent(url),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
+  ];
+  for(const p of proxies){
+    try{
+      const resp = await fetch(p);
+      if(resp.ok){ const text = await resp.text(); if(text && text.length>200) return text; }
+    }catch(e){}
+  }
+  const resp = await fetch(url);
+  if(resp.ok) return await resp.text();
+  throw new Error('No se pudo obtener la página');
+}
+function parseImportData(html, sourceUrl){
+  const get = (re) => { const m = html.match(re); return m ? m[1].trim() : ''; };
+  const decodeEnt = s => s.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+  let title = get(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) || get(/<title>([^<]+)<\/title>/i);
+  let image = get(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+  let desc = get(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i) || get(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+  title = title ? decodeEnt(title).replace(/\s*[|\-–]\s*(MakerWorld|Printables|Thingiverse).*$/i,'').trim() : '';
+  desc = desc ? decodeEnt(desc) : '';
+  const combined = html + ' ' + desc;
+  let gramos = '';
+  let mGram = combined.match(/"weight"\s*:\s*"?(\d+(?:\.\d+)?)/i) || combined.match(/(\d+(?:[.,]\d+)?)\s?(?:g|gr|gramos|grams)\b/i) || combined.match(/peso[^0-9]{0,10}(\d+(?:[.,]\d+)?)/i);
+  if(mGram) gramos = mGram[1].replace(',', '.');
+  let tiempoHoras = '';
+  let mTimeHM = combined.match(/(\d+)\s?h(?:ours|oras)?\s*(\d+)?\s?m(?:in)?/i);
+  let mTimeJson = combined.match(/"printTime"\s*:\s*"?(\d+)/i);
+  if(mTimeHM){ tiempoHoras = (Number(mTimeHM[1]) + Number(mTimeHM[2]||0)/60).toFixed(2); }
+  else if(mTimeJson){ tiempoHoras = (Number(mTimeJson[1])/3600).toFixed(2); }
+  return {title, image, desc, gramos, tiempoHoras, sourceUrl};
 }
 
 /* ---- Widgets de subida: fotos (comprimidas, guardadas como dataURL) y archivos 3D (STL/3MF, guardados en IndexedDB) ---- */
 function renderPhotoWidget(key, existingDataUrl){
-  const st = _uploadState[key] || {};
-  const dataUrl = st.data !== undefined ? st.data : (st.removed ? '' : existingDataUrl);
+  const st = _uploadState[key];
+  const dataUrl = st ? (st.kind==='removed' ? '' : st.data) : (existingDataUrl||'');
   if(dataUrl){
-    return `<div class="upload-preview"><img class="up-thumb" src="${dataUrl}" alt=""><div class="up-info"><div class="up-name">Foto cargada</div><div class="up-size">Tocá "Cambiar" para reemplazarla</div></div><button type="button" class="up-remove" onclick="removeUploadField('${key}','photo')" title="Quitar foto">✕</button></div>
+    return `<div class="upload-preview"><img class="up-thumb" src="${dataUrl}" alt=""><div class="up-info"><div class="up-name">${st&&st.kind==='auto'?'Vista previa automática (desde el archivo 3D)':'Foto cargada'}</div><div class="up-size">Tocá "Cambiar" para reemplazarla</div></div><button type="button" class="up-remove" onclick="removeUploadField('${key}','photo')" title="Quitar foto">✕</button></div>
     <label class="upload-box" style="margin-top:8px;">${ICONS.upload} Cambiar foto<input type="file" accept="image/*" onchange="handlePhotoInput(event,'${key}')"></label>`;
   }
   return `<label class="upload-box">${ICONS.upload} Subí una foto (JPG, PNG)<small>Se comprime automáticamente al guardar</small><input type="file" accept="image/*" onchange="handlePhotoInput(event,'${key}')"></label>`;
@@ -789,36 +1032,59 @@ async function handlePhotoInput(ev, key){
   wrap.innerHTML = `<div class="upload-box" style="cursor:default;">Procesando imagen...<div class="upload-progress"><div class="upload-progress-fill" style="width:60%"></div></div></div>`;
   try{
     const dataUrl = await compressImage(file);
-    _uploadState[key] = {data:dataUrl, removed:false};
+    _uploadState[key] = {kind:'upload', data:dataUrl};
     wrap.innerHTML = renderPhotoWidget(key, dataUrl);
   }catch(e){ toast('No se pudo procesar la imagen'); wrap.innerHTML = renderPhotoWidget(key, ''); }
 }
-function renderFile3dWidget(key, existingMeta){
+function renderFile3dWidget(key, existingMeta, photoKey){
   const st = _uploadState[key] || {};
   const meta = st.file ? {name:st.file.name, size:st.file.size} : (st.removed ? null : existingMeta);
+  const pk = photoKey||'';
   if(meta){
-    return `<div class="upload-preview"><div class="up-thumb-icon">${ICONS.modelos}</div><div class="up-info"><div class="up-name">${esc(meta.name)}</div><div class="up-size">${fmtBytes(meta.size)}${st.file?' · sin guardar todavía':''}</div></div><button type="button" class="up-remove" onclick="removeUploadField('${key}','file3d')" title="Quitar archivo">✕</button></div>
-    <label class="upload-box" style="margin-top:8px;">${ICONS.upload} Cambiar archivo<input type="file" accept=".stl,.3mf" onchange="handleFile3dInput(event,'${key}')"></label>`;
+    return `<div class="upload-preview"><div class="up-thumb-icon">${ICONS.modelos}</div><div class="up-info"><div class="up-name">${esc(meta.name)}</div><div class="up-size">${fmtBytes(meta.size)}${st.file?' · sin guardar todavía':''}</div></div>
+      <button type="button" class="btn btn-ghost btn-sm" title="Ver en 3D" onclick="verEnVisor3D('${key}')">${ICONS.orbit}</button>
+      <button type="button" class="up-remove" onclick="removeUploadField('${key}','file3d')" title="Quitar archivo">✕</button></div>
+    <label class="upload-box" style="margin-top:8px;">${ICONS.upload} Cambiar archivo<input type="file" accept=".stl,.3mf" onchange="handleFile3dInput(event,'${key}','${pk}')"></label>`;
   }
-  return `<label class="upload-box">${ICONS.upload} Subí un archivo .STL o .3MF<small>Se guarda en este navegador (IndexedDB)</small><input type="file" accept=".stl,.3mf" onchange="handleFile3dInput(event,'${key}')"></label>`;
+  return `<label class="upload-box">${ICONS.upload} Subí un archivo .STL o .3MF<small>Se guarda en este navegador y genera una vista previa automática</small><input type="file" accept=".stl,.3mf" onchange="handleFile3dInput(event,'${key}','${pk}')"></label>`;
 }
-function handleFile3dInput(ev, key){
+async function handleFile3dInput(ev, key, photoKey){
   const file = ev.target.files[0]; if(!file) return;
   if(!/\.(stl|3mf)$/i.test(file.name)){ toast('Solo se aceptan archivos .stl o .3mf'); ev.target.value=''; return; }
   _uploadState[key] = {file, removed:false};
-  document.getElementById('wrap_'+key).innerHTML = renderFile3dWidget(key, null);
+  document.getElementById('wrap_'+key).innerHTML = renderFile3dWidget(key, null, photoKey);
+  if(photoKey){
+    const photoWrap = document.getElementById('wrap_'+photoKey);
+    const alreadySet = _uploadState[photoKey] && _uploadState[photoKey].kind && _uploadState[photoKey].kind!=='auto';
+    if(photoWrap && !alreadySet){
+      photoWrap.innerHTML = `<div class="upload-box" style="cursor:default;">Generando vista previa del modelo 3D...<div class="upload-progress"><div class="upload-progress-fill" style="width:70%"></div></div></div>`;
+      try{
+        const dataUrl = await generateThumbnailFromFile(file);
+        _uploadState[photoKey] = {kind:'auto', data:dataUrl};
+        photoWrap.innerHTML = renderPhotoWidget(photoKey, dataUrl);
+      }catch(e){
+        photoWrap.innerHTML = renderPhotoWidget(photoKey, '');
+        toast('No pudimos generar la vista previa automática, pero el archivo se guardó igual');
+      }
+    }
+  }
 }
 function removeUploadField(key, kind){
-  _uploadState[key] = kind==='photo' ? {data:null, removed:true} : {file:null, removed:true};
+  _uploadState[key] = kind==='photo' ? {kind:'removed'} : {file:null, removed:true};
   const wrap = document.getElementById('wrap_'+key);
   wrap.innerHTML = kind==='photo' ? renderPhotoWidget(key,'') : renderFile3dWidget(key,null);
+}
+async function verEnVisor3D(key){
+  const st = _uploadState[key];
+  if(st && st.file){ openViewer3DFromBlob(st.file, st.file.name, st.file.name); return; }
+  toast('Guardá primero para poder ver el modelo en 3D');
 }
 async function saveForm(type, item){
   const schema = SCHEMAS[type];
   const data = item ? {...item} : {id:uid()};
   let valid = true;
   schema.fields.forEach(f=>{
-    if(f.type==='photo' || f.type==='file3d') return; // se procesan aparte más abajo
+    if(f.type==='photo' || f.type==='file3d' || f.type==='importlink') return; // se procesan aparte o no se guardan
     const el = document.getElementById('fld_'+f.key);
     let v;
     if(f.type==='checkbox') v = el.checked;
@@ -832,9 +1098,11 @@ async function saveForm(type, item){
   for(const f of schema.fields){
     if(f.type==='photo'){
       const st = _uploadState[f.key];
-      if(st && st.removed) data[f.key] = null;
-      else if(st && st.data !== undefined) data[f.key] = st.data;
-      else if(item) data[f.key] = item[f.key];
+      if(st && st.kind==='removed'){ data[f.key] = null; data.foto = null; }
+      else if(st && st.kind==='upload'){ data[f.key] = st.data; data.foto = null; }
+      else if(st && st.kind==='link'){ data[f.key] = null; data.foto = st.data; }
+      else if(st && st.kind==='auto'){ data[f.key] = st.data; data.foto = null; }
+      else if(item){ data[f.key] = item[f.key]; data.foto = item.foto; }
     }
     if(f.type==='file3d'){
       const st = _uploadState[f.key];
@@ -860,7 +1128,7 @@ async function saveForm(type, item){
     return;
   }
 
-  const map = {pedido:'pedidos', filamento:'filamentos', modelo:'modelos', lead:'leads', gasto:'gastos'};
+  const map = {pedido:'pedidos', filamento:'filamentos', modelo:'modelos', lead:'leads', gasto:'gastos', stock:'stock'};
   const key = map[type];
   const idx = DB[key].findIndex(x=>x.id===data.id);
   const prevFondoPct = metaPct();
@@ -916,7 +1184,7 @@ async function removeItem(key, id, label){
   setTimeout(async ()=>{
     if(!undone){
       await save(key);
-      if(key==='modelos' && removed.archivoMeta && removed.archivoMeta.id) await idbDeleteBlob(removed.archivoMeta.id).catch(()=>{});
+      if((key==='modelos'||key==='stock') && removed.archivoMeta && removed.archivoMeta.id) await idbDeleteBlob(removed.archivoMeta.id).catch(()=>{});
     }
   }, 4600);
 }
@@ -928,6 +1196,7 @@ function renderPage(opts){
   const titles = {dashboard:['Resumen','Tu taller, de un vistazo'], pedidos:['Pedidos','Todo lo que estás imprimiendo y entregando'],
     clientes:['Clientes','Quién te compra y cuánto'], filamentos:['Filamento','Stock de carretes y consumo'],
     presupuestos:['Presupuestos','Calculá precios y guardalos'], modelos:['Modelos','Tu catálogo de piezas listas para vender'],
+    stock:['Stock impreso','Piezas ya impresas, listas para vender'],
     leads:['Redes (Instagram / Facebook)','Seguimiento manual de mensajes y publicaciones'],
     gastos:['Gastos','Lo que sale del bolsillo del taller'],
     finanzas:['Finanzas y Metas','Bambu-Ómetro, dólar, máquinas y punto de equilibrio'],
@@ -943,6 +1212,7 @@ function renderPage(opts){
   else if(current==='filamentos'){ actions.innerHTML = addBtn('filamento','Nuevo carrete'); content.innerHTML = renderFilamentos(); }
   else if(current==='presupuestos'){ actions.innerHTML=''; content.innerHTML = renderPresupuestos(); attachCalc(); }
   else if(current==='modelos'){ actions.innerHTML = addBtn('modelo','Nuevo modelo'); content.innerHTML = renderModelos(); }
+  else if(current==='stock'){ actions.innerHTML = addBtn('stock','Nueva pieza'); content.innerHTML = renderStock(); }
   else if(current==='leads'){ actions.innerHTML = addBtn('lead','Nuevo contacto'); content.innerHTML = renderLeads(); }
   else if(current==='gastos'){ actions.innerHTML = addBtn('gasto','Nuevo gasto'); content.innerHTML = renderGastos(); }
   else if(current==='finanzas'){ actions.innerHTML=''; content.innerHTML = renderFinanzas(); }
@@ -1281,7 +1551,7 @@ function renderModelos(){
         </div>
         <div class="file">${archivoLinea}</div>
         <div class="row-actions" style="justify-content:flex-start;margin-top:2px;">
-          ${m.archivoMeta?`<button class="btn btn-ghost btn-sm" title="Descargar archivo 3D" onclick="descargarArchivoModelo('${m.id}')">${ICONS.download}</button>`:''}
+          ${m.archivoMeta?`<button class="btn btn-ghost btn-sm" title="Ver en 3D" onclick="verModeloEn3D('modelos','${m.id}')">${ICONS.orbit}</button><button class="btn btn-ghost btn-sm" title="Descargar archivo 3D" onclick="descargarArchivo('modelos','${m.id}')">${ICONS.download}</button>`:''}
           <button class="btn btn-ghost btn-sm" onclick="editModelo('${m.id}')">${ICONS.edit}</button>
           <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('modelos','${m.id}','este modelo')">${ICONS.trash}</button>
         </div>
@@ -1291,14 +1561,68 @@ function renderModelos(){
   return toolbar + `<div class="modelo-grid">${cards}</div>`;
 }
 function editModelo(id){ const m = DB.modelos.find(x=>x.id===id); if(m) openForm('modelo', m); }
-async function descargarArchivoModelo(id){
-  const m = DB.modelos.find(x=>x.id===id); if(!m || !m.archivoMeta) return;
+async function descargarArchivo(entityKey, id){
+  const m = DB[entityKey].find(x=>x.id===id); if(!m || !m.archivoMeta) return;
   const blob = await idbGetBlob(m.archivoMeta.id);
   if(!blob){ toast('No se encontró el archivo (puede haberse perdido al limpiar datos del navegador)'); return; }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = m.archivoMeta.name || 'modelo.stl';
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
+}
+
+/* ---- Stock de piezas ya impresas ---- */
+let stockSearch = '';
+function renderStock(){
+  const infoBox = `<div class="panel" style="margin-bottom:16px;"><h3>Qué es esto</h3><div style="color:var(--text-dim);font-size:13px;line-height:1.6;">Acá vas cargando las piezas que ya imprimiste y tenés listas para vender (a diferencia de "Modelos", que es tu catálogo de diseños). Subí una foto o un archivo .stl/.3mf, cargá cuántas unidades tenés y a qué precio las vendés.</div></div>`;
+  if(!DB.stock.length) return infoBox + emptyBlock('Todavía no cargaste stock impreso','Agregá tu primera pieza lista para vender.');
+  const toolbar = `<div class="toolbar"><input class="search grow" type="text" placeholder="Buscar pieza o categoría..." value="${esc(stockSearch)}" oninput="stockSearch=this.value;renderPage()"></div>`;
+  let list = DB.stock;
+  if(stockSearch) list = list.filter(s=>`${s.nombre||''} ${s.categoria||''}`.toLowerCase().includes(stockSearch.toLowerCase()));
+  const totalUnidades = DB.stock.reduce((s,x)=>s+Number(x.cantidad||0),0);
+  const valorStock = DB.stock.reduce((s,x)=>s+Number(x.cantidad||0)*Number(x.precioVenta||0),0);
+  const bajoStockN = DB.stock.filter(stockBajo).length;
+  const kpis = `<div class="kpi-grid">
+    <div class="kpi-card"><div class="k-label">Piezas distintas</div><div class="k-value">${DB.stock.length}</div><div class="k-foot">${totalUnidades} unidad(es) en total</div></div>
+    <div class="kpi-card"><div class="k-label">Valor de venta del stock</div><div class="k-value">${money(valorStock)}</div><div class="k-foot">si vendés todo al precio cargado</div></div>
+    <div class="kpi-card"><div class="k-label">Stock bajo</div><div class="k-value ${bajoStockN?'warn':''}" style="${bajoStockN?'color:var(--warn)':''}">${bajoStockN}</div><div class="k-foot">pieza(s) por debajo del mínimo</div></div>
+  </div>`;
+  if(!list.length) return infoBox + kpis + toolbar + emptyBlock('Sin resultados','Probá con otra búsqueda.');
+  const cards = list.map(s=>{
+    const fotoHtml = s.fotoData ? `<img src="${s.fotoData}" alt="">` : (s.foto ? `<img src="${esc(s.foto)}" onerror="this.parentElement.innerHTML='Sin foto'">` : 'Sin foto');
+    const fileExt = s.archivoMeta ? (s.archivoMeta.name.split('.').pop()||'').toUpperCase() : '';
+    const fileBadge = s.archivoMeta ? `<span class="modelo-filebadge">${ICONS.modelos}${fileExt}</span>` : '';
+    const bajo = stockBajo(s);
+    return `
+    <div class="modelo-card ${bajo?'fila-low':''}">
+      <div class="modelo-photo">${fotoHtml}${fileBadge}</div>
+      <div class="modelo-body">
+        <div class="cat">${esc(s.categoria||'sin categoría')}</div>
+        <div class="name">${esc(s.nombre)}</div>
+        <div class="modelo-meta">
+          <div><span>Stock</span>${s.cantidad||0} u.</div>
+          <div><span>Precio</span>${money(s.precioVenta)}</div>
+          <div><span>Costo</span>${money(s.costoUnitario)}</div>
+        </div>
+        ${bajo?`<div class="fila-flags"><span class="flag flag-low">Stock bajo</span></div>`:''}
+        ${s.ubicacion?`<div class="file">📍 ${esc(s.ubicacion)}</div>`:''}
+        <div class="row-actions" style="justify-content:flex-start;margin-top:2px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" title="Sumar unidad" onclick="ajustarStock('${s.id}',1)">+1</button>
+          <button class="btn btn-ghost btn-sm" title="Restar unidad" onclick="ajustarStock('${s.id}',-1)">−1</button>
+          ${s.archivoMeta?`<button class="btn btn-ghost btn-sm" title="Ver en 3D" onclick="verModeloEn3D('stock','${s.id}')">${ICONS.orbit}</button><button class="btn btn-ghost btn-sm" title="Descargar archivo 3D" onclick="descargarArchivo('stock','${s.id}')">${ICONS.download}</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="editStock('${s.id}')">${ICONS.edit}</button>
+          <button class="btn btn-ghost btn-sm btn-danger-text" onclick="removeItem('stock','${s.id}','esta pieza')">${ICONS.trash}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  return infoBox + kpis + toolbar + `<div class="modelo-grid">${cards}</div>`;
+}
+function editStock(id){ const s = DB.stock.find(x=>x.id===id); if(s) openForm('stock', s); }
+async function ajustarStock(id, delta){
+  const s = DB.stock.find(x=>x.id===id); if(!s) return;
+  s.cantidad = Math.max(0, Number(s.cantidad||0) + delta);
+  await save('stock'); renderNav(); renderPage();
 }
 
 /* ---- Leads ---- */
@@ -1664,6 +1988,11 @@ function renderConfig(){
     <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
   </div>
   <div class="panel" style="max-width:480px;margin-top:16px;">
+    <h3>Stock de piezas impresas</h3>
+    <div class="field"><label>Alertar stock bajo desde (unidades)</label><input id="cfAlertaStock" type="number" value="${c.alertaStockUnidades!==undefined?c.alertaStockUnidades:2}" style="max-width:120px;"></div>
+    <button class="btn btn-primary" onclick="saveConfig()" style="align-self:flex-start;">Guardar</button>
+  </div>
+  <div class="panel" style="max-width:480px;margin-top:16px;">
     <h3>Backup de tus datos</h3>
     <div class="info-box">Todo se guarda solo en este navegador (incluidas las fotos y los archivos .stl/.3mf que subís). Si cambiás de compu, borrás el historial, o querés tener una copia de seguridad, exportá un archivo y guardalo en tu Google Drive o donde prefieras. El backup incluye todo.</div>
     <div class="backup-actions">
@@ -1693,6 +2022,7 @@ async function saveConfig(){
     mermaPct: get('cfMerma') ? Number(get('cfMerma').value||0) : DB.config.mermaPct,
     alertaGramos: get('cfAlertaG') ? Number(get('cfAlertaG').value||150) : DB.config.alertaGramos,
     alertaHumedadDias: get('cfAlertaDias') ? Number(get('cfAlertaDias').value||90) : DB.config.alertaHumedadDias,
+    alertaStockUnidades: get('cfAlertaStock') ? Number(get('cfAlertaStock').value||2) : DB.config.alertaStockUnidades,
   };
   await save('config');
   renderNav(); renderPage();
@@ -1701,7 +2031,7 @@ async function saveConfig(){
 async function exportarBackup(){
   toast('Preparando backup (incluye fotos y archivos 3D)...');
   const archivosData = {};
-  for(const m of DB.modelos){
+  for(const m of [...DB.modelos, ...DB.stock]){
     if(m.archivoMeta && m.archivoMeta.id){
       try{ const blob = await idbGetBlob(m.archivoMeta.id); if(blob) archivosData[m.archivoMeta.id] = await readBlobAsDataURL(blob); }catch(e){}
     }
@@ -1721,7 +2051,7 @@ async function importarBackup(ev){
   try{
     const text = await file.text();
     const parsed = JSON.parse(text);
-    for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas']){ DB[k] = parsed[k]||(k==='maquinas'?MAQUINAS_DEFAULT.map(m=>({...m})):[]); await save(k); }
+    for(const k of ['pedidos','filamentos','modelos','leads','presupuestos','gastos','maquinas','stock']){ DB[k] = parsed[k]||(k==='maquinas'?MAQUINAS_DEFAULT.map(m=>({...m})):[]); await save(k); }
     DB.config = parsed.config || DB.config; await save('config');
     DB.finanzas = parsed.finanzas || DB.finanzas; await save('finanzas');
     if(parsed.archivosData){
